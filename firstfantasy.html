@@ -111,4 +111,78 @@ const canvas = document.getElementById('battleCanvas');
 const ctx = canvas.getContext('2d');
 const logEl = document.getElementById('battleLog');
 
-const player = new Character("勇者", 100, 30, 1
+const player = new Character("勇者", 100, 30, 100, 150, "#4ecca3", true);
+const monster = new Character("魔王 Slime", 120, 20, 440, 150, "#e94560");
+
+let isBusy = false; // 防止連續攻擊
+
+function addLog(msg, isCrit = false) {
+    const div = document.createElement('div');
+    if (isCrit) div.className = 'critical';
+    div.innerText = `> ${msg}`;
+    logEl.prepend(div);
+}
+
+function attack() {
+    if (isBusy || player.hp <= 0 || monster.hp <= 0) return;
+    
+    const input = document.getElementById('ansInput');
+    const userVal = parseInt(input.value);
+    
+    if (userVal === MathManager.ans) {
+        executePlayerTurn();
+    } else {
+        addLog("吟唱咒語失敗 (答案錯誤)！");
+        executeEnemyTurn();
+    }
+    input.value = '';
+}
+
+function executePlayerTurn() {
+    isBusy = true;
+    monster.hp -= player.atk;
+    monster.shake = 15;
+    addLog(`答對了！你對怪物造成 ${player.atk} 點傷害`);
+    
+    MathManager.generate();
+    
+    if (monster.hp <= 0) {
+        monster.hp = 0;
+        addLog("擊敗怪物！勝利！");
+        return;
+    }
+
+    setTimeout(executeEnemyTurn, 1000);
+}
+
+function executeEnemyTurn() {
+    player.hp -= monster.atk;
+    player.shake = 15;
+    addLog(`怪物反擊，造成 ${monster.atk} 點傷害`);
+    
+    if (player.hp <= 0) {
+        player.hp = 0;
+        addLog("你倒下了... GAME OVER");
+    }
+    isBusy = false;
+}
+
+// 遊戲循環 (渲染)
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 背景裝飾
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    ctx.fillRect(0, 210, 600, 90);
+
+    player.draw(ctx);
+    monster.draw(ctx);
+    requestAnimationFrame(gameLoop);
+}
+
+MathManager.generate();
+gameLoop();
+
+</script>
+</body>
+</html>
