@@ -50,43 +50,89 @@
  * 1. Character 類別：管理角色屬性與渲染
  */
 class Character {
-    constructor(name, hp, atk, x, y, color, isPlayer = false) {
+    constructor(name, hp, x, y, color) {
         this.name = name;
         this.maxHp = hp;
         this.hp = hp;
-        this.atk = atk;
         this.x = x;
         this.y = y;
         this.color = color;
-        this.isPlayer = isPlayer;
-        this.shake = 0; // 用於受傷震動
+        
+        // 優化屬性
+        this.shakeTimer = 0;      // 震動剩餘時間
+        this.flashTimer = 0;      // 閃白剩餘時間
+        this.displayHp = hp;      // 用於平滑血條動畫
+    }
+
+    // 當受到傷害時呼叫此方法
+    takeDamage(amount) {
+        this.hp = Math.max(0, this.hp - amount);
+        this.shakeTimer = 10;     // 持續 10 幀的震動
+        this.flashTimer = 5;      // 持續 5 幀的閃亮
+    }
+
+    update() {
+        // 平滑血條邏輯：讓血條慢慢扣除，視覺更有感
+        if (this.displayHp > this.hp) {
+            this.displayHp -= 0.5; 
+        }
     }
 
     draw(ctx) {
+        this.update();
         ctx.save();
-        if (this.shake > 0) {
-            ctx.translate(Math.random() * 10 - 5, 0);
-            this.shake--;
+
+        let renderX = this.x;
+        let renderY = this.y;
+
+        // --- 優化 1：打擊震動 (Shake) ---
+        if (this.shakeTimer > 0) {
+            renderX += (Math.random() - 0.5) * 10; // 隨機左右偏移
+            renderY += (Math.random() - 0.5) * 10; // 隨機上下偏移
+            this.shakeTimer--;
         }
 
-        // 畫身體
+        // 繪製角色本體
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, 60, 60);
+        ctx.fillRect(renderX, renderY, 60, 60);
 
-        // 畫血條
-        const barW = 80;
-        const barH = 8;
-        const barX = this.x - 10;
-        const barY = this.y - 20;
+        // --- 優化 2：受擊閃白 (Hit Flash) ---
+        // 這是專業打擊感的秘訣：受傷瞬間角色變白
+        if (this.flashTimer > 0) {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.fillRect(renderX, renderY, 60, 60);
+            this.flashTimer--;
+        }
 
-        ctx.fillStyle = "#444";
-        ctx.fillRect(barX, barY, barW, barH);
-        ctx.fillStyle = this.hp > 30 ? "#4ecca3" : "#e94560";
-        ctx.fillRect(barX, barY, (this.hp / this.maxHp) * barW, barH);
-        
-        ctx.fillStyle = "#fff";
-        ctx.font = "14px Arial";
-        ctx.fillText(this.name, barX, barY - 10);
+        // --- 優化 3：動態血條變色 ---
+        const barWidth = 60;
+        const barHeight = 8;
+        const hpPercent = this.hp / this.maxHp;
+        const displayPercent = this.displayHp / this.maxHp;
+
+        // 血條背景
+        ctx.fillStyle = "#333";
+        ctx.fillRect(renderX, renderY - 20, barWidth, barHeight);
+
+        // 血條顏色判定 (低於 30% 變紅)
+        // 這裡使用 displayPercent 讓顏色隨動畫平滑過渡
+        if (displayPercent < 0.3) {
+            ctx.fillStyle = "#ff4d4d"; // 危險紅
+        } else if (displayPercent < 0.6) {
+            ctx.fillStyle = "#ffd54f"; // 警告黃
+        } else {
+            ctx.fillStyle = "#4caf50"; // 安全綠
+        }
+
+        // 繪製實際血條
+        ctx.fillRect(renderX, renderY - 20, barWidth * displayPercent, barHeight);
+
+        // 名字文本
+        ctx.fillStyle = "white";
+        ctx.font = "12px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(this.name, renderX + 30, renderY - 25);
+
         ctx.restore();
     }
 }
