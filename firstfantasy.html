@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Hero: 算術勇者傳</title>
+    <title>Math Hero: 算術勇者傳 (Debugged)</title>
     <style>
         :root { --main-bg: #1a1a2e; --ui-panel: #16213e; --accent: #4ecca3; }
         body { background: var(--main-bg); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; }
@@ -11,7 +11,6 @@
         #game-wrapper { margin-top: 20px; border: 4px solid #fff; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
         canvas { background: #232946; display: block; }
 
-        /* UI 面板設計 */
         #ui-panel {
             width: 600px; background: var(--ui-panel); padding: 20px;
             box-sizing: border-box; border-top: 2px solid #fff;
@@ -35,7 +34,7 @@
     <canvas id="battleCanvas" width="600" height="300"></canvas>
     <div id="ui-panel">
         <div class="math-section">
-            <span id="question">12 + 34 = ?</span>
+            <span id="question">載入中...</span>
             <input type="number" id="ansInput" onkeydown="if(event.key==='Enter') attack()">
             <button onclick="attack()">攻擊</button>
         </div>
@@ -46,75 +45,73 @@
 </div>
 
 <script>
-/**
- * 1. Character 類別：管理角色屬性與渲染
- */
-class Character {
-    constructor(name, hp, x, y, color) {
-        this.name = name;
-        this.maxHp = hp;
-        this.hp = hp;
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        
-        // 優化屬性
-        this.shakeTimer = 0;      // 震動剩餘時間
-        this.flashTimer = 0;      // 閃白剩餘時間
-        this.displayHp = hp;      // 用於平滑血條動畫
-    }
-
-// 全域變數
+// --- 全域管理 ---
 let damageTexts = [];
 
-// 修改 Character 類別中的 takeDamage
-Character.prototype.takeDamage = function(amount) {
-    this.hp = Math.max(0, this.hp - amount);
-    this.shakeTimer = 10;
-    this.flashTimer = 5;
-
-    // --- 新增：產生浮動數字 ---
-    // 讓數字出現在角色頭頂附近，加入一點隨機偏移更生動
-    const textX = this.x + 30 + (Math.random() - 0.5) * 20;
-    const textY = this.y - 10;
-    damageTexts.push(new FloatingText(`-${amount}`, textX, textY, this.isPlayer ? "#ff4d4d" : "#ffd54f"));
-};
-
-    update() {
-        // 平滑血條邏輯：讓血條慢慢扣除，視覺更有感
-        if (this.displayHp > this.hp) {
-            this.displayHp -= 0.5; 
-        }
-    }
-    
+// --- 浮動文字類別 ---
 class FloatingText {
     constructor(value, x, y, color = "#ffeb3b") {
         this.value = value;
         this.x = x;
         this.y = y;
         this.color = color;
-        this.opacity = 1;       // 透明度，從 1 開始
-        this.life = 60;         // 持續 60 幀 (約 1 秒)
-        this.velocityV = -1.5;  // 向上移動的速度
+        this.opacity = 1;
+        this.life = 60;
+        this.velocityV = -1.5;
     }
 
     update() {
-        this.y += this.velocityV; // 向上漂浮
+        this.y += this.velocityV;
         this.life--;
-        this.opacity = this.life / 60; // 隨著時間變透明
+        this.opacity = Math.max(0, this.life / 60);
     }
 
     draw(ctx) {
         ctx.save();
         ctx.globalAlpha = this.opacity;
         ctx.fillStyle = this.color;
-        ctx.font = "bold 24px 'Courier New', Courier, monospace";
-        ctx.shadowColor = "black";
-        ctx.shadowBlur = 4;
+        ctx.font = "bold 24px 'Courier New', monospace";
+        ctx.textAlign = "center";
         ctx.fillText(this.value, this.x, this.y);
         ctx.restore();
     }
 }
+
+// --- 角色類別 ---
+class Character {
+    constructor(name, hp, atk, x, y, color, isPlayer = false) {
+        this.name = name;
+        this.maxHp = hp;
+        this.hp = hp;
+        this.atk = atk;
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.isPlayer = isPlayer;
+        
+        this.shakeTimer = 0;
+        this.flashTimer = 0;
+        this.displayHp = hp;
+    }
+
+    takeDamage(amount) {
+        this.hp = Math.max(0, this.hp - amount);
+        this.shakeTimer = 15; // 震動感
+        this.flashTimer = 5;  // 閃白感
+        
+        // 產生浮動數字
+        const textX = this.x + 30 + (Math.random() - 0.5) * 20;
+        const textY = this.y - 10;
+        damageTexts.push(new FloatingText(`-${amount}`, textX, textY, this.isPlayer ? "#ff4d4d" : "#ffd54f"));
+    }
+
+    update() {
+        if (this.displayHp > this.hp) {
+            this.displayHp -= 0.5; 
+            if (this.displayHp < this.hp) this.displayHp = this.hp;
+        }
+    }
+
     draw(ctx) {
         this.update();
         ctx.save();
@@ -122,49 +119,37 @@ class FloatingText {
         let renderX = this.x;
         let renderY = this.y;
 
-        // --- 優化 1：打擊震動 (Shake) ---
         if (this.shakeTimer > 0) {
-            renderX += (Math.random() - 0.5) * 10; // 隨機左右偏移
-            renderY += (Math.random() - 0.5) * 10; // 隨機上下偏移
+            renderX += (Math.random() - 0.5) * 8;
             this.shakeTimer--;
         }
 
-        // 繪製角色本體
+        // 畫本體
         ctx.fillStyle = this.color;
         ctx.fillRect(renderX, renderY, 60, 60);
 
-        // --- 優化 2：受擊閃白 (Hit Flash) ---
-        // 這是專業打擊感的秘訣：受傷瞬間角色變白
+        // 受擊閃白
         if (this.flashTimer > 0) {
             ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
             ctx.fillRect(renderX, renderY, 60, 60);
             this.flashTimer--;
         }
 
-        // --- 優化 3：動態血條變色 ---
-        const barWidth = 60;
-        const barHeight = 8;
-        const hpPercent = this.hp / this.maxHp;
+        // 血條
+        const barW = 60;
+        const barH = 8;
         const displayPercent = this.displayHp / this.maxHp;
 
-        // 血條背景
         ctx.fillStyle = "#333";
-        ctx.fillRect(renderX, renderY - 20, barWidth, barHeight);
+        ctx.fillRect(renderX, renderY - 20, barW, barH);
 
-        // 血條顏色判定 (低於 30% 變紅)
-        // 這裡使用 displayPercent 讓顏色隨動畫平滑過渡
-        if (displayPercent < 0.3) {
-            ctx.fillStyle = "#ff4d4d"; // 危險紅
-        } else if (displayPercent < 0.6) {
-            ctx.fillStyle = "#ffd54f"; // 警告黃
-        } else {
-            ctx.fillStyle = "#4caf50"; // 安全綠
-        }
+        // 變色邏輯
+        if (displayPercent < 0.3) ctx.fillStyle = "#ff4d4d";
+        else if (displayPercent < 0.6) ctx.fillStyle = "#ffd54f";
+        else ctx.fillStyle = "#4caf50";
 
-        // 繪製實際血條
-        ctx.fillRect(renderX, renderY - 20, barWidth * displayPercent, barHeight);
+        ctx.fillRect(renderX, renderY - 20, barW * displayPercent, barH);
 
-        // 名字文本
         ctx.fillStyle = "white";
         ctx.font = "12px Arial";
         ctx.textAlign = "center";
@@ -174,30 +159,26 @@ class FloatingText {
     }
 }
 
-/**
- * 2. MathManager：題目邏輯
- */
+// --- 邏輯管理器 ---
 const MathManager = {
     ans: 0,
     generate() {
         const a = Math.floor(Math.random() * 89) + 10;
         const b = Math.floor(Math.random() * 89) + 10;
         this.ans = a + b;
-        document.getElementById('question').innerText = `${a} + ${b} = `;
+        document.getElementById('question').innerText = `${a} + ${b} = ?`;
     }
 };
 
-/**
- * 3. 遊戲核心控制器
- */
 const canvas = document.getElementById('battleCanvas');
 const ctx = canvas.getContext('2d');
 const logEl = document.getElementById('battleLog');
 
+// 建立角色 (名字, HP, 攻擊力, X, Y, 顏色, 是否為玩家)
 const player = new Character("勇者", 100, 30, 100, 150, "#4ecca3", true);
-const monster = new Character("魔王 Slime", 120, 20, 440, 150, "#e94560");
+const monster = new Character("魔王 Slime", 120, 20, 440, 150, "#e94560", false);
 
-let isBusy = false; // 防止連續攻擊
+let isBusy = false;
 
 function addLog(msg, isCrit = false) {
     const div = document.createElement('div');
@@ -215,23 +196,22 @@ function attack() {
     if (userVal === MathManager.ans) {
         executePlayerTurn();
     } else {
-        addLog("吟唱咒語失敗 (答案錯誤)！");
+        addLog("答案錯誤，吟唱失敗！");
         executeEnemyTurn();
     }
     input.value = '';
+    input.focus();
 }
 
 function executePlayerTurn() {
     isBusy = true;
-    monster.hp -= player.atk;
-    monster.shake = 15;
+    monster.takeDamage(player.atk); // 使用 takeDamage 觸發特效
     addLog(`答對了！你對怪物造成 ${player.atk} 點傷害`);
     
     MathManager.generate();
     
     if (monster.hp <= 0) {
-        monster.hp = 0;
-        addLog("擊敗怪物！勝利！");
+        addLog("擊敗怪物！勝利！", true);
         return;
     }
 
@@ -239,41 +219,37 @@ function executePlayerTurn() {
 }
 
 function executeEnemyTurn() {
-    player.hp -= monster.atk;
-    player.shake = 15;
+    if (monster.hp <= 0) return;
+    player.takeDamage(monster.atk); // 怪物攻擊玩家
     addLog(`怪物反擊，造成 ${monster.atk} 點傷害`);
     
     if (player.hp <= 0) {
-        player.hp = 0;
-        addLog("你倒下了... GAME OVER");
+        addLog("你倒下了... GAME OVER", true);
+    } else {
+        isBusy = false;
     }
-    isBusy = false;
 }
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 繪製簡單裝飾線
+    ctx.strokeStyle = "rgba(255,255,255,0.1)";
+    ctx.beginPath(); ctx.moveTo(0, 210); ctx.lineTo(600, 210); ctx.stroke();
 
-    // 繪製背景裝飾 (略過...)
-
-    // 1. 更新並繪製角色
     player.draw(ctx);
     monster.draw(ctx);
 
-    // 2. 處理浮動數字系統
     for (let i = damageTexts.length - 1; i >= 0; i--) {
-        let txt = damageTexts[i];
-        txt.update();
-        txt.draw(ctx);
-
-        // 如果生命值結束，從陣列中移除防止記憶體洩漏
-        if (txt.life <= 0) {
-            damageTexts.splice(i, 1);
-        }
+        damageTexts[i].update();
+        damageTexts[i].draw(ctx);
+        if (damageTexts[i].life <= 0) damageTexts.splice(i, 1);
     }
 
     requestAnimationFrame(gameLoop);
 }
 
+// 初始化
 MathManager.generate();
 gameLoop();
 
