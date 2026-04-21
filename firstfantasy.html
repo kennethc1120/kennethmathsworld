@@ -64,12 +64,21 @@ class Character {
         this.displayHp = hp;      // 用於平滑血條動畫
     }
 
-    // 當受到傷害時呼叫此方法
-    takeDamage(amount) {
-        this.hp = Math.max(0, this.hp - amount);
-        this.shakeTimer = 10;     // 持續 10 幀的震動
-        this.flashTimer = 5;      // 持續 5 幀的閃亮
-    }
+// 全域變數
+let damageTexts = [];
+
+// 修改 Character 類別中的 takeDamage
+Character.prototype.takeDamage = function(amount) {
+    this.hp = Math.max(0, this.hp - amount);
+    this.shakeTimer = 10;
+    this.flashTimer = 5;
+
+    // --- 新增：產生浮動數字 ---
+    // 讓數字出現在角色頭頂附近，加入一點隨機偏移更生動
+    const textX = this.x + 30 + (Math.random() - 0.5) * 20;
+    const textY = this.y - 10;
+    damageTexts.push(new FloatingText(`-${amount}`, textX, textY, this.isPlayer ? "#ff4d4d" : "#ffd54f"));
+};
 
     update() {
         // 平滑血條邏輯：讓血條慢慢扣除，視覺更有感
@@ -77,7 +86,35 @@ class Character {
             this.displayHp -= 0.5; 
         }
     }
+    
+class FloatingText {
+    constructor(value, x, y, color = "#ffeb3b") {
+        this.value = value;
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.opacity = 1;       // 透明度，從 1 開始
+        this.life = 60;         // 持續 60 幀 (約 1 秒)
+        this.velocityV = -1.5;  // 向上移動的速度
+    }
 
+    update() {
+        this.y += this.velocityV; // 向上漂浮
+        this.life--;
+        this.opacity = this.life / 60; // 隨著時間變透明
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
+        ctx.fillStyle = this.color;
+        ctx.font = "bold 24px 'Courier New', Courier, monospace";
+        ctx.shadowColor = "black";
+        ctx.shadowBlur = 4;
+        ctx.fillText(this.value, this.x, this.y);
+        ctx.restore();
+    }
+}
     draw(ctx) {
         this.update();
         ctx.save();
@@ -213,16 +250,27 @@ function executeEnemyTurn() {
     isBusy = false;
 }
 
-// 遊戲循環 (渲染)
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // 背景裝飾
-    ctx.fillStyle = "rgba(255,255,255,0.05)";
-    ctx.fillRect(0, 210, 600, 90);
 
+    // 繪製背景裝飾 (略過...)
+
+    // 1. 更新並繪製角色
     player.draw(ctx);
     monster.draw(ctx);
+
+    // 2. 處理浮動數字系統
+    for (let i = damageTexts.length - 1; i >= 0; i--) {
+        let txt = damageTexts[i];
+        txt.update();
+        txt.draw(ctx);
+
+        // 如果生命值結束，從陣列中移除防止記憶體洩漏
+        if (txt.life <= 0) {
+            damageTexts.splice(i, 1);
+        }
+    }
+
     requestAnimationFrame(gameLoop);
 }
 
