@@ -3,237 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Hero: 算術勇者傳 (Debugged)</title>
+    <title>DSE Math RPG: 終極勇者版</title>
     <style>
-        :root { --main-bg: #1a1a2e; --ui-panel: #16213e; --accent: #4ecca3; }
-        body { background: var(--main-bg); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; }
+        :root { --main-bg: #1a1a2e; --ui-panel: #16213e; --accent: #4ecca3; --danger: #e94560; }
+        body { background: var(--main-bg); color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; }
         
-        #game-wrapper { margin-top: 20px; border: 4px solid #fff; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        canvas { background: #232946; display: block; }
-
-        #ui-panel {
-            width: 600px; background: var(--ui-panel); padding: 20px;
-            box-sizing: border-box; border-top: 2px solid #fff;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+        /* 1. 登入畫面 */
+        #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(10, 10, 25, 0.95); display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; z-index: 100;
         }
+        #start-screen h1 { color: var(--accent); margin-bottom: 20px; }
+        #start-screen input { padding: 12px; font-size: 18px; border-radius: 5px; border: 2px solid var(--accent); background: #0f3460; color: white; margin-bottom: 15px; width: 250px; text-align: center; }
+        #start-screen button { padding: 12px 40px; font-size: 18px; cursor: pointer; background: var(--accent); border: none; border-radius: 5px; font-weight: bold; }
 
-        .math-section { text-align: center; border: 2px solid var(--accent); padding: 10px; border-radius: 10px; }
-        #question { font-size: 28px; display: block; margin-bottom: 10px; color: var(--accent); font-weight: bold; }
+        /* 2. 遊戲主容器 */
+        #game-wrapper { margin-top: 20px; border: 4px solid #fff; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 600px; }
+        canvas { background: #232946; display: block; border-bottom: 2px solid #fff; }
+
+        /* 3. MCQ 答題區 */
+        #ui-panel { background: var(--ui-panel); padding: 20px; box-sizing: border-box; }
+        #question { font-size: 20px; color: var(--accent); min-height: 60px; text-align: center; font-weight: bold; line-height: 1.4; }
         
-        input { width: 80px; font-size: 24px; text-align: center; border-radius: 5px; border: none; outline: none; }
-        button { background: var(--accent); color: #1a1a2e; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; }
-        button:hover { filter: brightness(1.2); }
+        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .opt-btn { 
+            background: #0f3460; color: #fff; border: 1px solid var(--accent); padding: 15px; 
+            cursor: pointer; border-radius: 8px; font-size: 16px; transition: 0.3s;
+        }
+        .opt-btn:hover { background: var(--accent); color: #1a1a2e; transform: translateY(-2px); }
+        .opt-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .log-section { font-size: 14px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; height: 80px; overflow-y: hidden; }
-        .critical { color: #ff4d4d; font-weight: bold; }
+        #battleLog { font-size: 14px; color: #aaa; margin-top: 15px; text-align: center; height: 20px; }
     </style>
 </head>
 <body>
 
+<div id="start-screen">
+    <h1>DSE 數學勇者傳</h1>
+    <input type="text" id="playerNameInput" placeholder="輸入你的姓名..." maxlength="10">
+    <button onclick="startGame()">進入戰場</button>
+</div>
+
 <div id="game-wrapper">
     <canvas id="battleCanvas" width="600" height="300"></canvas>
     <div id="ui-panel">
-        <div class="math-section">
-            <span id="question">載入中...</span>
-            <input type="number" id="ansInput" onkeydown="if(event.key==='Enter') attack()">
-            <button onclick="attack()">攻擊</button>
-        </div>
-        <div class="log-section" id="battleLog">
-            <div>準備戰鬥！輸入正確答案發動攻擊。</div>
-        </div>
+        <div id="question">題目載入中...</div>
+        <div class="option-grid" id="optionsContainer"></div>
+        <div id="battleLog">準備戰鬥！</div>
     </div>
 </div>
 
 <script>
-// --- 全域管理 ---
+// --- [A] 全域數據與配置 ---
 let damageTexts = [];
+let playerName = "";
+let score = 0;
+let isBusy = false;
+let currentQ = null;
 
-// --- 浮動文字類別 ---
+// DSE 題庫 (可隨時增加)
+const DSE_Library = [
+    { q: "若 log 2 = a, log 3 = b, 則 log 12 = ?", opts: ["2a+b", "a+2b", "a+b^2", "a^2+b"], ans: 0 },
+    { q: "圓方程 x² + y² - 4x + 6y - 3 = 0 的半徑是？", opts: ["√10", "4", "2", "16"], ans: 1 },
+    { q: "拋物線 y = x² - 4x + 7 的頂點座標是？", opts: ["(2, 3)", "(-2, 3)", "(2, 7)", "(4, 7)"], ans: 0 },
+    { q: "一袋中有 3 紅球 2 藍球，隨機取兩球。兩球同色的概率是？", opts: ["1/5", "2/5", "3/10", "4/10"], ans: 1 },
+    { q: "若 cos θ = -0.5 且 180° < θ < 270°，則 θ = ?", opts: ["210°", "225°", "240°", "150°"], ans: 2 }
+];
+
+// --- [B] 核心類別 ---
 class FloatingText {
-    constructor(value, x, y, color = "#ffeb3b") {
-        this.value = value;
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.opacity = 1;
-        this.life = 60;
-        this.velocityV = -1.5;
+    constructor(value, x, y, color) {
+        this.value = value; this.x = x; this.y = y; this.color = color;
+        this.opacity = 1; this.life = 60;
     }
-
-    update() {
-        this.y += this.velocityV;
-        this.life--;
-        this.opacity = Math.max(0, this.life / 60);
-    }
-
+    update() { this.y -= 1.2; this.life--; this.opacity = this.life / 60; }
     draw(ctx) {
-        ctx.save();
-        ctx.globalAlpha = this.opacity;
-        ctx.fillStyle = this.color;
-        ctx.font = "bold 24px 'Courier New', monospace";
-        ctx.textAlign = "center";
-        ctx.fillText(this.value, this.x, this.y);
-        ctx.restore();
+        ctx.save(); ctx.globalAlpha = this.opacity; ctx.fillStyle = this.color;
+        ctx.font = "bold 26px Arial"; ctx.textAlign = "center";
+        ctx.fillText(this.value, this.x, this.y); ctx.restore();
     }
 }
 
-// --- 角色類別 ---
 class Character {
-    constructor(name, hp, atk, x, y, color, isPlayer = false) {
-        this.name = name;
-        this.maxHp = hp;
-        this.hp = hp;
-        this.atk = atk;
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.isPlayer = isPlayer;
-        
-        this.shakeTimer = 0;
-        this.flashTimer = 0;
-        this.displayHp = hp;
+    constructor(name, hp, atk, x, y, color, isPlayer) {
+        this.name = name; this.maxHp = hp; this.hp = hp; this.atk = atk;
+        this.x = x; this.y = y; this.color = color; this.isPlayer = isPlayer;
+        this.shakeTimer = 0; this.flashTimer = 0; this.displayHp = hp;
     }
-
     takeDamage(amount) {
         this.hp = Math.max(0, this.hp - amount);
-        this.shakeTimer = 15; // 震動感
-        this.flashTimer = 5;  // 閃白感
-        
-        // 產生浮動數字
-        const textX = this.x + 30 + (Math.random() - 0.5) * 20;
-        const textY = this.y - 10;
-        damageTexts.push(new FloatingText(`-${amount}`, textX, textY, this.isPlayer ? "#ff4d4d" : "#ffd54f"));
+        this.shakeTimer = 15; this.flashTimer = 5;
+        damageTexts.push(new FloatingText(`-${amount}`, this.x + 30, this.y - 10, this.isPlayer ? "#ff4d4d" : "#ffd54f"));
     }
-
     update() {
-        if (this.displayHp > this.hp) {
-            this.displayHp -= 0.5; 
-            if (this.displayHp < this.hp) this.displayHp = this.hp;
-        }
+        if (this.displayHp > this.hp) this.displayHp -= 0.5;
     }
-
     draw(ctx) {
-        this.update();
-        ctx.save();
+        this.update(); ctx.save();
+        let rx = this.x; if (this.shakeTimer > 0) { rx += (Math.random()-0.5)*10; this.shakeTimer--; }
+        
+        ctx.fillStyle = this.color; ctx.fillRect(rx, this.y, 60, 60);
+        if (this.flashTimer > 0) { ctx.fillStyle = "white"; ctx.fillRect(rx, this.y, 60, 60); this.flashTimer--; }
 
-        let renderX = this.x;
-        let renderY = this.y;
-
-        if (this.shakeTimer > 0) {
-            renderX += (Math.random() - 0.5) * 8;
-            this.shakeTimer--;
-        }
-
-        // 畫本體
-        ctx.fillStyle = this.color;
-        ctx.fillRect(renderX, renderY, 60, 60);
-
-        // 受擊閃白
-        if (this.flashTimer > 0) {
-            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-            ctx.fillRect(renderX, renderY, 60, 60);
-            this.flashTimer--;
-        }
-
-        // 血條
-        const barW = 60;
-        const barH = 8;
-        const displayPercent = this.displayHp / this.maxHp;
-
-        ctx.fillStyle = "#333";
-        ctx.fillRect(renderX, renderY - 20, barW, barH);
-
-        // 變色邏輯
-        if (displayPercent < 0.3) ctx.fillStyle = "#ff4d4d";
-        else if (displayPercent < 0.6) ctx.fillStyle = "#ffd54f";
-        else ctx.fillStyle = "#4caf50";
-
-        ctx.fillRect(renderX, renderY - 20, barW * displayPercent, barH);
-
-        ctx.fillStyle = "white";
-        ctx.font = "12px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(this.name, renderX + 30, renderY - 25);
-
-        ctx.restore();
+        // 血條渲染
+        const barW = 60; const pct = this.displayHp / this.maxHp;
+        ctx.fillStyle = "#333"; ctx.fillRect(rx, this.y - 20, barW, 8);
+        ctx.fillStyle = pct < 0.3 ? "#ff4d4d" : (pct < 0.6 ? "#ffd54f" : "#4caf50");
+        ctx.fillRect(rx, this.y - 20, barW * pct, 8);
+        ctx.fillStyle = "white"; ctx.font = "12px Arial"; ctx.textAlign = "center";
+        ctx.fillText(this.name, rx + 30, this.y - 25); ctx.restore();
     }
 }
 
-// --- 邏輯管理器 ---
-const MathManager = {
-    ans: 0,
-    generate() {
-        const a = Math.floor(Math.random() * 89) + 10;
-        const b = Math.floor(Math.random() * 89) + 10;
-        this.ans = a + b;
-        document.getElementById('question').innerText = `${a} + ${b} = ?`;
-    }
-};
-
+// --- [C] 初始化遊戲對象 ---
 const canvas = document.getElementById('battleCanvas');
 const ctx = canvas.getContext('2d');
-const logEl = document.getElementById('battleLog');
+const player = new Character("勇者", 100, 40, 100, 150, "#4ecca3", true);
+const monster = new Character("DSE 考官", 150, 20, 440, 150, "#e94560", false);
 
-// 建立角色 (名字, HP, 攻擊力, X, Y, 顏色, 是否為玩家)
-const player = new Character("勇者", 100, 30, 100, 150, "#4ecca3", true);
-const monster = new Character("魔王 Slime", 120, 20, 440, 150, "#e94560", false);
-
-let isBusy = false;
-
-function addLog(msg, isCrit = false) {
-    const div = document.createElement('div');
-    if (isCrit) div.className = 'critical';
-    div.innerText = `> ${msg}`;
-    logEl.prepend(div);
+// --- [D] 遊戲流程邏輯 ---
+function startGame() {
+    playerName = document.getElementById('playerNameInput').value.trim();
+    if (!playerName) { alert("請輸入姓名以紀錄成績！"); return; }
+    document.getElementById('start-screen').style.display = 'none';
+    nextQuestion();
+    gameLoop();
 }
 
-function attack() {
+function nextQuestion() {
+    currentQ = DSE_Library[Math.floor(Math.random() * DSE_Library.length)];
+    document.getElementById('question').innerText = currentQ.q;
+    const container = document.getElementById('optionsContainer');
+    container.innerHTML = "";
+    currentQ.opts.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(idx);
+        container.appendChild(btn);
+    });
+}
+
+function checkAnswer(choice) {
     if (isBusy || player.hp <= 0 || monster.hp <= 0) return;
+    isBusy = true;
     
-    const input = document.getElementById('ansInput');
-    const userVal = parseInt(input.value);
-    
-    if (userVal === MathManager.ans) {
-        executePlayerTurn();
+    // 禁用所有按鈕
+    const btns = document.querySelectorAll('.opt-btn');
+    btns.forEach(b => b.disabled = true);
+
+    if (choice === currentQ.ans) {
+        monster.takeDamage(player.atk);
+        score += 20;
+        document.getElementById('battleLog').innerText = "正確！造成強力傷害！";
+        if (monster.hp <= 0) { finishGame("勝利！正在儲存成績..."); return; }
     } else {
-        addLog("答案錯誤，吟唱失敗！");
-        executeEnemyTurn();
+        document.getElementById('battleLog').innerText = "錯誤！受到反彈傷害！";
+        player.takeDamage(10); // 答錯懲罰
+        if (player.hp <= 0) { finishGame("戰敗... 正在儲存成績..."); return; }
     }
-    input.value = '';
-    input.focus();
+    
+    setTimeout(enemyTurn, 1000);
 }
 
-function executePlayerTurn() {
-    isBusy = true;
-    monster.takeDamage(player.atk); // 使用 takeDamage 觸發特效
-    addLog(`答對了！你對怪物造成 ${player.atk} 點傷害`);
+function enemyTurn() {
+    if (monster.hp <= 0 || player.hp <= 0) return;
+    player.takeDamage(monster.atk);
+    document.getElementById('battleLog').innerText = `考官發動攻擊，造成 ${monster.atk} 傷害！`;
     
-    MathManager.generate();
-    
-    if (monster.hp <= 0) {
-        addLog("擊敗怪物！勝利！", true);
+    if (player.hp <= 0) {
+        finishGame("戰敗... 正在儲存成績...");
+    } else {
+        isBusy = false;
+        nextQuestion();
+    }
+}
+
+function finishGame(msg) {
+    document.getElementById('battleLog').innerText = msg;
+    uploadData();
+}
+
+// --- [E] Google Sheets 上傳 ---
+function uploadData() {
+    const URL = "你的_GOOGLE_APPS_SCRIPT_URL"; // <--- 在這裡貼上你的 Script URL
+    const data = { name: playerName, score: score, date: new Date().toLocaleString() };
+
+    console.log("上傳數據:", data);
+
+    if (URL.includes("你的_GOOGLE")) {
+        alert(`遊戲結束！\n玩家：${playerName}\n最終分數：${score}\n(提示：尚未設定 Google Script URL)`);
         return;
     }
 
-    setTimeout(executeEnemyTurn, 1000);
+    fetch(URL, {
+        method: "POST",
+        mode: "no-cors", // 重要：跨域處理
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+    }).then(() => {
+        alert("成績已成功紀錄到 Google Sheets！");
+    }).catch(err => console.error("上傳失敗", err));
 }
 
-function executeEnemyTurn() {
-    if (monster.hp <= 0) return;
-    player.takeDamage(monster.atk); // 怪物攻擊玩家
-    addLog(`怪物反擊，造成 ${monster.atk} 點傷害`);
-    
-    if (player.hp <= 0) {
-        addLog("你倒下了... GAME OVER", true);
-    } else {
-        isBusy = false;
-    }
-}
-
+// --- [F] 渲染循環 ---
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 繪製簡單裝飾線
+    // 繪製背景裝飾線
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
     ctx.beginPath(); ctx.moveTo(0, 210); ctx.lineTo(600, 210); ctx.stroke();
 
@@ -245,14 +223,8 @@ function gameLoop() {
         damageTexts[i].draw(ctx);
         if (damageTexts[i].life <= 0) damageTexts.splice(i, 1);
     }
-
     requestAnimationFrame(gameLoop);
 }
-
-// 初始化
-MathManager.generate();
-gameLoop();
-
 </script>
 </body>
 </html>
