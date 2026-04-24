@@ -35,6 +35,23 @@
         .opt-btn:disabled { opacity: 0.5; }
 
         #battleLog { font-size: 14px; color: #aaa; margin-top: 15px; text-align: center; height: 20px; }
+        /* 必殺技按鈕呼吸燈效果 */
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px #9b59b6; }
+            50% { box-shadow: 0 0 20px #9b59b6; }
+            100% { box-shadow: 0 0 5px #9b59b6; }
+        }
+
+        #ult-btn {
+             animation: glow 1.5s infinite;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* 讓面板切換時不要跳動太厲害 */
+        #ui-panel {
+            min-height: 250px; /* 固定最小高度 */
+        }
     </style>
 </head>
 <body>
@@ -48,9 +65,21 @@
 <div id="game-wrapper">
     <canvas id="battleCanvas" width="600" height="300"></canvas>
     <div id="ui-panel">
+    <div id="action-menu" style="display: block;">
+        <div style="text-align: center; margin-bottom: 10px; color: #4ecca3; font-weight: bold;">選擇行動：</div>
+        <div class="option-grid">
+            <button class="opt-btn" onclick="selectAction('attack')">⚔️ 普通攻擊</button>
+            <button class="opt-btn" onclick="selectAction('defend')">🛡️ 進入防禦</button>
+            <button id="ult-btn" class="opt-btn" onclick="selectAction('ult')" style="display: none; background: #9b59b6; border-color: #d1a3e0;">🔥 必殺：極限運算</button>
+        </div>
+    </div>
+
+    <div id="quiz-area" style="display: none;">
         <div id="question">題目載入中...</div>
         <div class="option-grid" id="optionsContainer"></div>
-        <div id="battleLog">準備戰鬥！</div>
+    </div>
+
+    <div id="battleLog">準備戰鬥！</div>
     </div>
 </div>
 
@@ -80,11 +109,6 @@ let loadedCount = 0;
     };
 });
 
-//const DSE_Library = [
-//    { q: "若 log 2 = a, log 3 = b, 則 log 12 = ?", opts: ["2a+b", "a+2b", "a+b^2", "a^2+b"], ans: 0 },
-//    { q: "圓方程 x² + y² - 4x + 6y - 3 = 0 的半徑是？", opts: ["√10", "4", "2", "16"], ans: 1 },
-//    { q: "拋物線 y = x² - 4x + 7 的頂點座標是？", opts: ["(2, 3)", "(-2, 3)", "(2, 7)", "(4, 7)"], ans: 0 },
- //   { q: "一袋中有 3
 
 let damageTexts = [];
 let playerName = "";
@@ -108,34 +132,85 @@ class FloatingText {
 
 class Character {
     constructor(name, hp, atk, x, y, img, w, h, isPlayer) {
+        // ... 原有屬性 ...
         this.name = name; this.maxHp = hp; this.hp = hp; this.atk = atk;
         this.x = x; this.y = y; this.img = img; this.w = w; this.h = h;
         this.isPlayer = isPlayer;
         this.shakeTimer = 0; this.flashTimer = 0; this.displayHp = hp;
+        this.sp = 0;             // 能量值 (0-100)
+        this.isDefending = false; // 是否防禦中
     }
     takeDamage(amount) {
+        // 如果正在防禦，傷害減半
+        let finalDamage = this.isDefending ? Math.floor(amount * 0.5) : amount;
+        this.hp = Math.max(0, this.hp - finalDamage);
+        
+        // ... 原有動畫邏輯 ...
         this.hp = Math.max(0, this.hp - amount);
         this.shakeTimer = 15; this.flashTimer = 5;
         damageTexts.push(new FloatingText(`-${amount}`, this.x + this.w/2, this.y, this.isPlayer ? "#ff4d4d" : "#ffd54f"));
-    }
+        this.isDefending = false; // 受傷後解除防禦狀態
+        return finalDamage;
+    }     }
     update() { if (this.displayHp > this.hp) this.displayHp -= 0.5; }
-    draw(ctx) {
-        this.update(); ctx.save();
-        let rx = this.x; if (this.shakeTimer > 0) { rx += (Math.random()-0.5)*10; this.shakeTimer--; }
-        if (this.flashTimer > 0) { ctx.filter = "brightness(3)"; this.flashTimer--; }
-
-        // 畫角色圖片
-        ctx.drawImage(this.img, rx, this.y, this.w, this.h);
-        ctx.filter = "none";
-
-        // 血條渲染
-        const barW = this.w; const pct = this.displayHp / this.maxHp;
-        ctx.fillStyle = "#333"; ctx.fillRect(rx, this.y - 15, barW, 6);
-        ctx.fillStyle = pct < 0.3 ? "#ff4d4d" : (pct < 0.6 ? "#ffd54f" : "#4caf50");
-        ctx.fillRect(rx, this.y - 15, barW * pct, 6);
-        ctx.fillStyle = "white"; ctx.font = "bold 12px Arial"; ctx.textAlign = "center";
-        ctx.fillText(this.name, rx + this.w/2, this.y - 25); ctx.restore();
+draw(ctx) {
+    this.update(); 
+    ctx.save();
+    
+    // 1. 處理震動與閃白效果
+    let rx = this.x; 
+    if (this.shakeTimer > 0) { 
+        rx += (Math.random() - 0.5) * 10; 
+        this.shakeTimer--; 
     }
+    if (this.flashTimer > 0) { 
+        ctx.filter = "brightness(3)"; 
+        this.flashTimer--; 
+    }
+
+    // 2. 畫出角色圖片
+    ctx.drawImage(this.img, rx, this.y, this.w, this.h);
+    ctx.filter = "none"; // 畫完圖片後重設濾鏡，避免影響後面的條狀圖
+
+    // 3. 繪製血條 (HP Bar)
+    const barW = this.w; 
+    const hpPct = this.displayHp / this.maxHp;
+    ctx.fillStyle = "#333"; 
+    ctx.fillRect(rx, this.y - 15, barW, 6); // 背景深灰色
+    ctx.fillStyle = hpPct < 0.3 ? "#ff4d4d" : (hpPct < 0.6 ? "#ffd54f" : "#4caf50");
+    ctx.fillRect(rx, this.y - 15, barW * hpPct, 6); // 根據血量比例填色
+
+    // ----------------------------------------------------
+    // 4. 新增：繪製能量條 (SP Bar) - 僅限主角
+    // ----------------------------------------------------
+    if (this.isPlayer) {
+        const spPct = Math.min(this.sp / 100, 1); // 能量比例 (0 ~ 1)
+        
+        // 能量條背景 (深藍黑色)
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; 
+        ctx.fillRect(rx, this.y - 7, barW, 4); 
+        
+        // 能量條填色 (亮藍色)
+        ctx.fillStyle = "#3498db"; 
+        ctx.fillRect(rx, this.y - 7, barW * spPct, 4);
+
+        // 如果能量滿了，加一個發光的外框效果
+        if (this.sp >= 100) {
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(rx, this.y - 7, barW, 4);
+        }
+    }
+    // ----------------------------------------------------
+
+    // 5. 繪製名字
+    ctx.fillStyle = "white"; 
+    ctx.font = "bold 12px Arial"; 
+    ctx.textAlign = "center";
+    ctx.fillText(this.name, rx + this.w / 2, this.y - 25); 
+    
+    ctx.restore();
+}
 }
 
 // --- [3] 遊戲邏輯 ---
@@ -148,7 +223,9 @@ function startGame() {
     playerName = document.getElementById('playerNameInput').value.trim();
     if (!playerName) { alert("請輸入姓名！"); return; }
     document.getElementById('start-screen').style.display = 'none';
-    nextQuestion();
+    
+    // 改為顯示指令選單，而不是直接出題
+    showActionMenu();
     gameLoop();
 }
 
@@ -205,50 +282,109 @@ function renderOptions() {
     });
 }
 
+// --- 確保在腳本最上方 (全域變數區) 加上這行 ---
+let currentAction = 'attack';
+
+// ==========================================
+// 戰鬥邏輯：三種行為的實踐 (請貼在這裡)
+// ==========================================
+
+// 1. 顯示指令選單 (每回合開始時呼叫)
+function showActionMenu() {
+    isBusy = false;
+    document.getElementById('action-menu').style.display = 'block';
+    document.getElementById('quiz-area').style.display = 'none';
+    
+    // 檢查能量是否滿 100，決定要不要顯示必殺技
+    const ultBtn = document.getElementById('ult-btn');
+    if (player.sp >= 100) {
+        ultBtn.style.display = 'inline-block';
+    } else {
+        ultBtn.style.display = 'none';
+    }
+}
+
+// 2. 處理玩家點擊選單按鈕
+function selectAction(action) {
+    currentAction = action;
+    
+    if (action === 'defend') {
+        player.isDefending = true;
+        player.sp = Math.min(100, player.sp + 10); // 防禦也能稍微回 10 SP
+        document.getElementById('battleLog').innerText = "🛡️ 進入防禦姿態！下擊受傷減半。";
+        // 防禦不答題，直接讓怪物攻擊
+        setTimeout(enemyTurn, 1000);
+    } else {
+        // 攻擊 或 必殺技：隱藏選單，顯示題目
+        document.getElementById('action-menu').style.display = 'none';
+        document.getElementById('quiz-area').style.display = 'block';
+        nextQuestion(); 
+    }
+}
+
+// 3. 處理答題結果 (替換原本的 checkAnswer)
 function checkAnswer(choice) {
     if (isBusy || player.hp <= 0 || monster.hp <= 0) return;
     isBusy = true;
-    const btns = document.querySelectorAll('.opt-btn');
+    
+    // 禁用選項按鈕，防止連點
+    const btns = document.querySelectorAll('#optionsContainer .opt-btn');
     btns.forEach(b => b.disabled = true);
 
     if (choice === currentQ.ans) {
-        monster.takeDamage(player.atk);
-        score += 20;
-        document.getElementById('battleLog').innerText = "正確！造成重擊！";
-        if (monster.hp <= 0) { finishGame("勝利！正儲存成績..."); return; }
+        // 答對了！根據選擇的招式決定傷害
+        let dmg = player.atk;
+        if (currentAction === 'ult') {
+            dmg = player.atk * 3; // 必殺技 3 倍傷害
+            player.sp = 0;        // 放完大招能量清空
+            document.getElementById('battleLog').innerText = "🔥 必殺：極限運算！造成 3 倍傷害！";
+            document.getElementById('battleLog').style.color = "#9b59b6";
+        } else {
+            player.sp = Math.min(100, player.sp + 25); // 普攻加 25 SP
+            document.getElementById('battleLog').innerText = "✅ 正確！發動精準打擊！";
+            document.getElementById('battleLog').style.color = "#4ecca3";
+        }
+
+        monster.takeDamage(dmg);
+
+        if (monster.hp <= 0) { 
+            finishGame("勝利！正儲存成績..."); 
+            return; 
+        }
+        
+        // 答對的話怪物不反擊，1.5 秒後回到指令選單
+        setTimeout(showActionMenu, 1500); 
+
     } else {
-        document.getElementById('battleLog').innerText = "錯誤！受到反彈！";
-        player.takeDamage(15);
-        if (player.hp <= 0) { finishGame("戰敗... 正儲存成績..."); return; }
+        // 答錯了！
+        document.getElementById('battleLog').innerText = "❌ 算錯了！招式被斷，考官趁機反擊！";
+        document.getElementById('battleLog').style.color = "#ff4d4d";
+        // 1 秒後觸發怪物回合
+        setTimeout(enemyTurn, 1000);
     }
-    setTimeout(enemyTurn, 1000);
 }
 
+// 4. 怪物回合 (替換原本的 enemyTurn)
 function enemyTurn() {
     if (monster.hp <= 0 || player.hp <= 0) return;
+    
+    // 傷害亂數 (加入 20% 浮動)
+    const variance = 0.2;
+    const minDmg = Math.floor(monster.atk * (1 - variance));
+    const maxDmg = Math.floor(monster.atk * (1 + variance));
+    let finalDamage = Math.floor(Math.random() * (maxDmg - minDmg + 1)) + minDmg;
 
-    let finalDamage = monster.atk;
-    let isCrit = Math.random() < 0.1; // 10% 機率暴擊
-
-    if (isCrit) {
-        finalDamage = Math.floor(monster.atk * 1.5);
-        document.getElementById('battleLog').innerText = "💥 考官看穿了你的弱點！致命一擊！";
-        document.getElementById('battleLog').style.color = "#ff4d4d"; // 日誌變紅
-    } else {
-        // 一般傷害亂數
-        const variance = Math.floor(Math.random() * 7) - 3; // -3 ~ +3 的偏移
-        finalDamage += variance;
-        document.getElementById('battleLog').innerText = `考官發動攻擊，造成 ${finalDamage} 點傷害。`;
-        document.getElementById('battleLog').style.color = "#aaa";
-    }
-
+    // 呼叫 takeDamage (裡面已經寫好如果 isDefending = true 會減半傷害)
     player.takeDamage(finalDamage);
-
+    
+    document.getElementById('battleLog').innerText = `考官發動攻擊，造成 ${finalDamage} 點傷害！`;
+    document.getElementById('battleLog').style.color = "#ff4d4d";
+    
     if (player.hp <= 0) {
         finishGame("戰敗... 正在儲存成績...");
     } else {
-        isBusy = false;
-        nextQuestion();
+        // 怪物攻擊完畢後，1.5 秒後回到玩家的指令選單
+        setTimeout(showActionMenu, 1500);
     }
 }
 
