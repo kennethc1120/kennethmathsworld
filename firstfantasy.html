@@ -140,19 +140,24 @@ class Character {
         this.sp = 0;             // 能量值 (0-100)
         this.isDefending = false; // 是否防禦中
     }
-    takeDamage(amount) {
+takeDamage(amount) {
         // 如果正在防禦，傷害減半
         let finalDamage = this.isDefending ? Math.floor(amount * 0.5) : amount;
         this.hp = Math.max(0, this.hp - finalDamage);
         
-        // ... 原有動畫邏輯 ...
-        this.hp = Math.max(0, this.hp - amount);
-        this.shakeTimer = 15; this.flashTimer = 5;
-        damageTexts.push(new FloatingText(`-${amount}`, this.x + this.w/2, this.y, this.isPlayer ? "#ff4d4d" : "#ffd54f"));
+        this.shakeTimer = 15; 
+        this.flashTimer = 5;
+        
+        // 浮動文字顯示計算後的傷害 (finalDamage)
+        damageTexts.push(new FloatingText(`-${finalDamage}`, this.x + this.w/2, this.y, this.isPlayer ? "#ff4d4d" : "#ffd54f"));
+        
         this.isDefending = false; // 受傷後解除防禦狀態
         return finalDamage;
-    }     }
-    update() { if (this.displayHp > this.hp) this.displayHp -= 0.5; }
+    }
+
+    update() { 
+        if (this.displayHp > this.hp) this.displayHp -= 0.5; 
+    }
 draw(ctx) {
     this.update(); 
     ctx.save();
