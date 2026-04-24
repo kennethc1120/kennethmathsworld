@@ -84,8 +84,7 @@ let loadedCount = 0;
 //    { q: "若 log 2 = a, log 3 = b, 則 log 12 = ?", opts: ["2a+b", "a+2b", "a+b^2", "a^2+b"], ans: 0 },
 //    { q: "圓方程 x² + y² - 4x + 6y - 3 = 0 的半徑是？", opts: ["√10", "4", "2", "16"], ans: 1 },
 //    { q: "拋物線 y = x² - 4x + 7 的頂點座標是？", opts: ["(2, 3)", "(-2, 3)", "(2, 7)", "(4, 7)"], ans: 0 },
- //   { q: "一袋中有 3 紅球 2 藍球，隨機取兩球。兩球同色的概率是？", opts: ["1/5", "2/5", "3/10", "4/10"], ans: 1 }
-//];
+ //   { q: "一袋中有 3
 
 let damageTexts = [];
 let playerName = "";
@@ -227,11 +226,33 @@ function checkAnswer(choice) {
 
 function enemyTurn() {
     if (monster.hp <= 0 || player.hp <= 0) return;
-    player.takeDamage(monster.atk);
-    document.getElementById('battleLog').innerText = "考官發動攻擊！";
-    if (player.hp <= 0) finishGame("戰敗... 正儲存成績...");
-    else { isBusy = false; nextQuestion(); }
+
+    let finalDamage = monster.atk;
+    let isCrit = Math.random() < 0.1; // 10% 機率暴擊
+
+    if (isCrit) {
+        finalDamage = Math.floor(monster.atk * 1.5);
+        document.getElementById('battleLog').innerText = "💥 考官看穿了你的弱點！致命一擊！";
+        document.getElementById('battleLog').style.color = "#ff4d4d"; // 日誌變紅
+    } else {
+        // 一般傷害亂數
+        const variance = Math.floor(Math.random() * 7) - 3; // -3 ~ +3 的偏移
+        finalDamage += variance;
+        document.getElementById('battleLog').innerText = `考官發動攻擊，造成 ${finalDamage} 點傷害。`;
+        document.getElementById('battleLog').style.color = "#aaa";
+    }
+
+    player.takeDamage(finalDamage);
+
+    if (player.hp <= 0) {
+        finishGame("戰敗... 正在儲存成績...");
+    } else {
+        isBusy = false;
+        nextQuestion();
+    }
 }
+
+
 
 function finishGame(msg) {
     document.getElementById('battleLog').innerText = msg;
