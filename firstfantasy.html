@@ -129,47 +129,40 @@
 <script src="./questionsff.js"></script>
 <script>
 // --- [1] 素材與數據配置 ---
+// --- [1] 素材與數據配置 ---
 const assets = {
-    background: new Image(),
-    player: new Image(),
-    monster: new Image(),
-    // 新增地圖素材
-    tileGround: new Image(),
-    tileWall: new Image(),
-    tileGrass: new Image()
+    background: new Image(), player: new Image(), monster: new Image(),
+    tileGround: new Image(), tileWall: new Image(), tileGrass: new Image()
 };
 
-// **請修改為你的圖片路徑**
-assets.background.src = './img/ff/bg_forest.png'; 
-assets.player.src = './img/ff/character.png';
-assets.monster.src = './img/ff/monster1.png';
-assets.tileGround.src = './img/ff/ground.png'; // 平地
-assets.tileWall.src = './img/ff/tree.png';     // 牆壁 / 樹木 / 障礙物
-assets.tileGrass.src = './img/ff/grass.png';   // 草叢
-
 let loadedCount = 0;
-// 將所有要載入嘅圖片放入一個陣列
 const allImages = [
     assets.background, assets.player, assets.monster, 
     assets.tileGround, assets.tileWall, assets.tileGrass
 ];
 
+// 先設定 onload 同 onerror 監聽器
 allImages.forEach(img => {
     img.onload = () => {
         loadedCount++;
-        // 確保 6 張圖都載入完畢
         if(loadedCount === allImages.length) {
             const btn = document.getElementById('startBtn');
             btn.disabled = false;
             btn.innerText = "進入戰場";
         }
     };
-    // --- 新增：如果載入失敗，會彈出警告話你知邊張圖出事 ---
     img.onerror = () => {
-        console.error("❌ 無法載入圖片: " + img.src);
-        alert("載入失敗！搵唔到呢張圖片:\n" + img.src + "\n\n請檢查資料夾同檔名！");
+        alert("載入圖片失敗，請檢查路徑：" + img.src);
     };
 });
+
+// 最後先一次過設定 src 路徑，觸發載入
+assets.background.src = './img/ff/bg_forest.png'; 
+assets.player.src = './img/ff/character.png';
+assets.monster.src = './img/ff/monster1.png';
+assets.tileGround.src = './img/ff/ground.png'; 
+assets.tileWall.src = './img/ff/tree.png';     
+assets.tileGrass.src = './img/ff/grass.png';
 
 
 let damageTexts = [];
