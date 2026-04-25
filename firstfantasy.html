@@ -132,19 +132,33 @@
 const assets = {
     background: new Image(),
     player: new Image(),
-    monster: new Image()
+    monster: new Image(),
+    // 新增地圖素材
+    tileGround: new Image(),
+    tileWall: new Image(),
+    tileGrass: new Image()
 };
 
 // **請修改為你的圖片路徑**
 assets.background.src = './img/bg_forest.png'; 
 assets.player.src = './img/character.png';
 assets.monster.src = './img/monster1.png';
+assets.tileGround.src = './img/ground.png'; // 平地
+assets.tileWall.src = './img/tree.png';     // 牆壁 / 樹木 / 障礙物
+assets.tileGrass.src = './img/grass.png';   // 草叢
 
 let loadedCount = 0;
-[assets.background, assets.player, assets.monster].forEach(img => {
+// 將所有要載入嘅圖片放入一個陣列
+const allImages = [
+    assets.background, assets.player, assets.monster, 
+    assets.tileGround, assets.tileWall, assets.tileGrass
+];
+
+allImages.forEach(img => {
     img.onload = () => {
         loadedCount++;
-        if(loadedCount === 3) {
+        // 確保 6 張圖都載入完畢
+        if(loadedCount === allImages.length) {
             const btn = document.getElementById('startBtn');
             btn.disabled = false;
             btn.innerText = "進入戰場";
@@ -522,14 +536,20 @@ function drawMap() {
             let x = col * TILE_SIZE;
             let y = row * TILE_SIZE;
 
-            // 根據數字決定顏色
-            if (tile === 1) ctx.fillStyle = "#2c3e50"; // 牆壁 (深藍)
-            else if (tile === 2) ctx.fillStyle = "#27ae60"; // 草叢 (綠色)
-            else ctx.fillStyle = "#ecf0f1"; // 平地 或 隱藏機關 (3 也是這個顏色)
+            // 預設畫平地 (包含 0 號平地 同埋 3 號隱藏機關)
+            let imgToDraw = assets.tileGround; 
 
-            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+            // 根據數字決定用邊張圖
+            if (tile === 1) {
+                imgToDraw = assets.tileWall;  // 1 號畫牆壁
+            } else if (tile === 2) {
+                imgToDraw = assets.tileGrass; // 2 號畫草叢
+            }
+
+            // 畫出圖片 (自動縮放到 TILE_SIZE 大小)
+            ctx.drawImage(imgToDraw, x, y, TILE_SIZE, TILE_SIZE);
             
-            // 畫出格子線條 (可選)
+            // (選填) 如果你想保留淡淡嘅黑色格線方便睇位，可以保留下面兩行：
             ctx.strokeStyle = "rgba(0,0,0,0.1)";
             ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
         }
