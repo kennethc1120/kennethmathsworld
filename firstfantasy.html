@@ -118,13 +118,13 @@ let currentQ = null;
 let gameState = "MAP"; // 初始狀態是地圖探索
  // 0 = 平地 (可走), 1 = 障礙物 (不可走), 2 = 遇敵區 (草叢), 3 = 傳送門/出口
 const mapData = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 2, 1],
-    [1, 0, 1, 1, 0, 1, 1, 0, 2, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 0, 0, 1],
-    [1, 0, 0, 2, 2, 2, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 2, 2, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 0, 0, 2, 2, 2, 0, 0, 1],
+    [1, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
 const TILE_SIZE = 40; // 每個格子的大小（像素）   
@@ -143,6 +143,7 @@ class FloatingText {
 }
 
 class Character {
+    
     constructor(name, hp, atk, x, y, img, w, h, isPlayer) {
         // ... 原有屬性 ...
         this.name = name; this.maxHp = hp; this.hp = hp; this.atk = atk;
@@ -151,6 +152,9 @@ class Character {
         this.shakeTimer = 0; this.flashTimer = 0; this.displayHp = hp;
         this.sp = 0;             // 能量值 (0-100)
         this.isDefending = false; // 是否防禦中
+        // --- 新增：地圖系統的座標 ---
+        this.mapX = 1; // 陣列中的 X (行)
+        this.mapY = 1; // 陣列中的 Y (列)
     }
 takeDamage(amount) {
         // 如果正在防禦，傷害減半
@@ -228,6 +232,13 @@ draw(ctx) {
     
     ctx.restore();
 }
+// --- 新增：在地圖上畫出角色 ---
+    drawOnMap(ctx) {
+        let px = this.mapX * TILE_SIZE;
+        let py = this.mapY * TILE_SIZE;
+        // 把主角圖片縮放到剛好符合格子大小
+        ctx.drawImage(this.img, px, py, TILE_SIZE, TILE_SIZE);
+    }   
 }
 
 // --- [3] 遊戲邏輯 ---
@@ -241,8 +252,12 @@ function startGame() {
     if (!playerName) { alert("請輸入姓名！"); return; }
     document.getElementById('start-screen').style.display = 'none';
     
-    // 改為顯示指令選單，而不是直接出題
-    showActionMenu();
+    // 初始化設定為地圖模式
+    gameState = "MAP"; 
+    
+    // 隱藏 UI 面板，讓玩家看完整地圖
+    document.getElementById('ui-panel').style.display = 'none';
+    
     gameLoop();
 }
 
@@ -462,7 +477,17 @@ function movePlayer(dx, dy) {
         }
     }
 }
-    
+// --- 監聽鍵盤按鍵來移動主角 ---
+window.addEventListener('keydown', (e) => {
+    // 如果不是在地圖模式，或者遊戲還沒開始，就不允許移動
+    if (gameState !== "MAP") return; 
+
+    // W, A, S, D 或 上下左右方向鍵
+    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') movePlayer(0, -1);
+    if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') movePlayer(0, 1);
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') movePlayer(-1, 0);
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') movePlayer(1, 0);
+});    
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
