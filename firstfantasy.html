@@ -159,12 +159,12 @@ let score = 0;
 let isBusy = false;
 let currentQ = null;
 let gameState = "MAP"; // 初始狀態是地圖探索
- // 0 = 平地 (可走), 1 = 障礙物 (不可走), 2 = 遇敵區 (草叢), 3 = 傳送門/出口
+// 0=平地, 1=牆壁, 2=草叢(隨機遇敵), 3=隱藏機關(強制遇敵)
 const mapData = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1],
     [1, 0, 1, 1, 0, 1, 1, 0, 2, 2, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 1], // 這裡放了兩個隱藏機關
     [1, 0, 1, 1, 1, 1, 1, 0, 0, 2, 2, 2, 0, 0, 1],
     [1, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
@@ -421,9 +421,9 @@ function checkAnswer(choice) {
         }
 
         monster.takeDamage(dmg);
-
+        
         if (monster.hp <= 0) { 
-            finishGame("勝利！正儲存成績..."); 
+            winBattle(); 
             return; 
         }
         
@@ -455,15 +455,49 @@ function enemyTurn() {
     document.getElementById('battleLog').innerText = `考官發動攻擊，造成 ${finalDamage} 點傷害！`;
     document.getElementById('battleLog').style.color = "#ff4d4d";
     
-    if (player.hp <= 0) {
-        finishGame("戰敗... 正在儲存成績...");
-    } else {
+     if (player.hp <= 0) {
+        document.getElementById('battleLog').innerText = "💀 你戰敗了... 勇者請重新來過。";
+        setTimeout(() => {
+        location.reload(); // 最簡單的做法：重新整理網頁
+      }, 2000);
+        } else {
         // 怪物攻擊完畢後，1.5 秒後回到玩家的指令選單
         setTimeout(showActionMenu, 1500);
     }
 }
 
+// 新增勝利處理函式
+function winBattle() {
+    isBusy = true;
+    document.getElementById('battleLog').innerText = "✌️ 戰鬥勝利！可以繼續前進了。";
+    document.getElementById('battleLog').style.color = "#4ecca3";
 
+    // 1. 如果是踩到機關觸發的，把該格機關消滅掉，變成普通地板
+    if (player.lastTrapPos) {
+        mapData[player.lastTrapPos.y][player.lastTrapPos.x] = 0;
+        player.lastTrapPos = null; // 清除記錄
+    }
+
+    // 2. 增加分數
+    score += 100;
+
+    // 3. 延遲 1.5 秒後回到地圖，給玩家一點成就感時間
+    setTimeout(() => {
+        gameState = "MAP";
+        resetMonster(); // 為下一場戰鬥準備
+        isBusy = false;
+    }, 1500);
+}
+
+// 重置怪物的函式
+function resetMonster() {
+    monster.hp = monster.maxHp;
+    monster.displayHp = monster.maxHp;
+    // 如果有不同種類的怪物，也可以在這裡隨機更換圖片或數值
+    monster.atk = 25; 
+    const canvas = document.getElementById('battleCanvas');
+    canvas.style.filter = "none"; // 清除狂暴化濾鏡
+}
 
 function finishGame(msg) {
     document.getElementById('battleLog').innerText = msg;
@@ -491,7 +525,7 @@ function drawMap() {
             // 根據數字決定顏色
             if (tile === 1) ctx.fillStyle = "#2c3e50"; // 牆壁 (深藍)
             else if (tile === 2) ctx.fillStyle = "#27ae60"; // 草叢 (綠色)
-            else ctx.fillStyle = "#ecf0f1"; // 平地 (白色)
+            else ctx.fillStyle = "#ecf0f1"; // 平地 或 隱藏機關 (3 也是這個顏色)
 
             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
             
@@ -502,23 +536,41 @@ function drawMap() {
     }
 }
 function movePlayer(dx, dy) {
+    if (gameState !== "MAP") return;
+
     let nextX = player.mapX + dx;
     let nextY = player.mapY + dy;
 
-    // 檢查是否撞牆 (1)
-    if (mapData[nextY][nextX] === 1) return;
+    if (mapData[nextY][nextX] === 1) return; // 撞牆
 
-    // 更新位置
     player.mapX = nextX;
     player.mapY = nextY;
 
-    // 檢查是否遇敵 (2 代表草叢)
-    if (mapData[nextY][nextX] === 2) {
-        if (Math.random() < 0.15) { // 15% 機率遇敵
-            gameState = "BATTLE";
-            showActionMenu(); // 進入你寫好的戰鬥選單
+    let currentTile = mapData[nextY][nextX];
+
+    // 處理隱藏機關 (Tile 3)
+    if (currentTile === 3) {
+        document.getElementById('battleLog').innerText = "⚠️ 踩到隱藏機關！怪物出現了！";
+        startForcedBattle(nextX, nextY); 
+    } 
+    // 處理普通草叢 (Tile 2)
+    else if (currentTile === 2) {
+        if (Math.random() < 0.15) {
+            startRandomBattle();
         }
     }
+}
+
+// 啟動強制戰鬥
+function startForcedBattle(x, y) {
+    // 進入戰鬥狀態
+    gameState = "BATTLE";
+    
+    // 戰鬥勝利後要移除這個座標的機關，我們把它存起來
+    player.lastTrapPos = {x: x, y: y}; 
+    
+    resetMonster(); // 確保怪物血量滿格
+    showActionMenu();
 }
 // --- 監聽鍵盤按鍵來移動主角 ---
 window.addEventListener('keydown', (e) => {
