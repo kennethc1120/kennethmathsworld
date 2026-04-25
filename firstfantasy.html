@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSE Math RPG: 終極素材整合版</title>
+    <title>DSE Math First Fantasy</title>
     <style>
         :root { --main-bg: #1a1a2e; --ui-panel: #16213e; --accent: #4ecca3; }
         body { background: var(--main-bg); color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; }
@@ -91,7 +91,7 @@
 <body>
 
 <div id="start-screen">
-    <h1 style="color:var(--accent)">DSE 數學勇者傳</h1>
+    <h1 style="color:var(--accent)">數學First Fantasy</h1>
     <input type="text" id="playerNameInput" placeholder="輸入玩家姓名..." maxlength="10">
     <button id="startBtn" onclick="startGame()" disabled>素材載入中...</button>
 </div>
@@ -140,12 +140,12 @@ const assets = {
 };
 
 // **請修改為你的圖片路徑**
-assets.background.src = './img/bg_forest.png'; 
-assets.player.src = './img/character.png';
-assets.monster.src = './img/monster1.png';
-assets.tileGround.src = './img/ground.png'; // 平地
-assets.tileWall.src = './img/tree.png';     // 牆壁 / 樹木 / 障礙物
-assets.tileGrass.src = './img/grass.png';   // 草叢
+assets.background.src = './img/ff/bg_forest.png'; 
+assets.player.src = './img/ff/character.png';
+assets.monster.src = './img/ff/monster1.png';
+assets.tileGround.src = './img/ff/ground.png'; // 平地
+assets.tileWall.src = './img/ff/tree.png';     // 牆壁 / 樹木 / 障礙物
+assets.tileGrass.src = './img/ff/grass.png';   // 草叢
 
 let loadedCount = 0;
 // 將所有要載入嘅圖片放入一個陣列
@@ -176,14 +176,13 @@ let gameState = "MAP"; // 初始狀態是地圖探索
 // 0=平地, 1=牆壁, 2=草叢(隨機遇敵), 3=隱藏機關(強制遇敵)
 const mapData = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 0, 2, 2, 1, 1, 1, 0, 1],
-    [1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 1], // 這裡放了兩個隱藏機關
-    [1, 0, 1, 1, 1, 1, 1, 0, 0, 2, 2, 2, 0, 0, 1],
-    [1, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 2, 2, 2, 3, 2, 2, 0, 0, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 2, 1, 1, 0, 0, 0, 1, 1, 1, 2, 1],
+    [1, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 1], // 這裡放了兩個隱藏機關
+    [1, 2, 1, 0, 1, 1, 1, 2, 2, 0, 0, 0, 2, 2, 1],
+    [1, 2, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-];
-
+    }
 const TILE_SIZE = 40; // 每個格子的大小（像素）   
 // --- [2] 核心類別 ---
 class FloatingText {
