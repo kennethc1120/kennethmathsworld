@@ -115,7 +115,19 @@ let playerName = "";
 let score = 0;
 let isBusy = false;
 let currentQ = null;
+let gameState = "MAP"; // 初始狀態是地圖探索
+ // 0 = 平地 (可走), 1 = 障礙物 (不可走), 2 = 遇敵區 (草叢), 3 = 傳送門/出口
+const mapData = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 2, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 2, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 0, 0, 1],
+    [1, 0, 0, 2, 2, 2, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+];
 
+const TILE_SIZE = 40; // 每個格子的大小（像素）   
 // --- [2] 核心類別 ---
 class FloatingText {
     constructor(value, x, y, color) {
@@ -410,18 +422,78 @@ function uploadData() {
     fetch(URL, { method: "POST", mode: "no-cors", body: JSON.stringify(data) })
     .then(() => alert("成績已上傳至 Google Sheet！"));
 }
+    
+function drawMap() {
+    for (let row = 0; row < mapData.length; row++) {
+        for (let col = 0; col < mapData[row].length; col++) {
+            let tile = mapData[row][col];
+            let x = col * TILE_SIZE;
+            let y = row * TILE_SIZE;
 
+            // 根據數字決定顏色
+            if (tile === 1) ctx.fillStyle = "#2c3e50"; // 牆壁 (深藍)
+            else if (tile === 2) ctx.fillStyle = "#27ae60"; // 草叢 (綠色)
+            else ctx.fillStyle = "#ecf0f1"; // 平地 (白色)
+
+            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+            
+            // 畫出格子線條 (可選)
+            ctx.strokeStyle = "rgba(0,0,0,0.1)";
+            ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+        }
+    }
+}
+function movePlayer(dx, dy) {
+    let nextX = player.mapX + dx;
+    let nextY = player.mapY + dy;
+
+    // 檢查是否撞牆 (1)
+    if (mapData[nextY][nextX] === 1) return;
+
+    // 更新位置
+    player.mapX = nextX;
+    player.mapY = nextY;
+
+    // 檢查是否遇敵 (2 代表草叢)
+    if (mapData[nextY][nextX] === 2) {
+        if (Math.random() < 0.15) { // 15% 機率遇敵
+            gameState = "BATTLE";
+            showActionMenu(); // 進入你寫好的戰鬥選單
+        }
+    }
+}
+    
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(assets.background, 0, 0, 600, 300); // 繪製背景
-    player.draw(ctx);
-    monster.draw(ctx);
-    for (let i = damageTexts.length - 1; i >= 0; i--) {
-        damageTexts[i].update(); damageTexts[i].draw(ctx);
-        if (damageTexts[i].life <= 0) damageTexts.splice(i, 1);
+
+    if (gameState === "MAP") {
+        // --- 地圖模式 ---
+        drawMap();
+        player.drawOnMap(ctx); // 你需要為主角寫一個在地圖上的簡單繪製方法
+        
+        // 隱藏戰鬥用的 UI 面板
+        document.getElementById('ui-panel').style.display = 'none';
+        
+    } else if (gameState === "BATTLE") {
+        // --- 戰鬥模式 (即你現在寫好的部分) ---
+        ctx.drawImage(assets.background, 0, 0, 600, 300);
+        player.draw(ctx);
+        monster.draw(ctx);
+        
+        // 顯示戰鬥用的 UI 面板
+        document.getElementById('ui-panel').style.display = 'block';
+
+        // 處理漂浮傷害文字
+        for (let i = damageTexts.length - 1; i >= 0; i--) {
+            damageTexts[i].update(); 
+            damageTexts[i].draw(ctx);
+            if (damageTexts[i].life <= 0) damageTexts.splice(i, 1);
+        }
     }
+    
     requestAnimationFrame(gameLoop);
 }
+    
 </script>
 </body>
 </html>
