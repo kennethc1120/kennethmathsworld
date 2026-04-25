@@ -52,6 +52,40 @@
         #ui-panel {
             min-height: 250px; /* 固定最小高度 */
         }
+        
+        /* 虛擬方向鍵排版與美化 */
+        #dpad-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .dpad-grid {
+            display: grid;
+            grid-template-columns: 50px 50px 50px;
+            grid-template-rows: 50px 50px; /* 兩行高 */
+            gap: 8px;
+            justify-content: center;
+        }
+        .dpad-btn {
+            background: #0f3460;
+            color: #fff;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            user-select: none; /* 防止手機點擊時選取文字 */
+            touch-action: manipulation; /* 提升手機點擊反應速度 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.1s;
+        }
+        .dpad-btn:active {
+            background: var(--accent);
+            color: #1a1a2e;
+            transform: scale(0.95); /* 按下時稍微縮細，增加手感 */
+        }
     </style>
 </head>
 <body>
@@ -65,6 +99,15 @@
 <div id="game-wrapper">
     <canvas id="battleCanvas" width="600" height="300"></canvas>
     <div id="ui-panel">
+        <div id="dpad-container" style="display: none;">
+            <div style="text-align: center; margin-bottom: 10px; color: #aaa;">移動角色</div>
+            <div class="dpad-grid">
+                <div></div> <button class="dpad-btn" onclick="movePlayer(0, -1)">▲</button>
+                <div></div> <button class="dpad-btn" onclick="movePlayer(-1, 0)">◀</button>
+                <button class="dpad-btn" onclick="movePlayer(0, 1)">▼</button>
+                <button class="dpad-btn" onclick="movePlayer(1, 0)">▶</button>
+            </div>
+        </div>
     <div id="action-menu" style="display: block;">
         <div style="text-align: center; margin-bottom: 10px; color: #4ecca3; font-weight: bold;">選擇行動：</div>
         <div class="option-grid">
@@ -488,27 +531,29 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') movePlayer(-1, 0);
     if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') movePlayer(1, 0);
 });    
+
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (gameState === "MAP") {
-        // --- 地圖模式 ---
         drawMap();
-        player.drawOnMap(ctx); // 你需要為主角寫一個在地圖上的簡單繪製方法
+        player.drawOnMap(ctx);
         
-        // 隱藏戰鬥用的 UI 面板
-        document.getElementById('ui-panel').style.display = 'none';
+        // 地圖模式：顯示 UI 面板，顯示方向鍵，隱藏戰鬥選單
+        document.getElementById('ui-panel').style.display = 'block';
+        document.getElementById('dpad-container').style.display = 'flex';
+        document.getElementById('action-menu').style.display = 'none';
+        document.getElementById('quiz-area').style.display = 'none';
         
     } else if (gameState === "BATTLE") {
-        // --- 戰鬥模式 (即你現在寫好的部分) ---
         ctx.drawImage(assets.background, 0, 0, 600, 300);
         player.draw(ctx);
         monster.draw(ctx);
         
-        // 顯示戰鬥用的 UI 面板
+        // 戰鬥模式：顯示 UI 面板，隱藏方向鍵
         document.getElementById('ui-panel').style.display = 'block';
+        document.getElementById('dpad-container').style.display = 'none';
 
-        // 處理漂浮傷害文字
         for (let i = damageTexts.length - 1; i >= 0; i--) {
             damageTexts[i].update(); 
             damageTexts[i].draw(ctx);
