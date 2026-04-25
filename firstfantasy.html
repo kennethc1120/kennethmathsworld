@@ -164,6 +164,11 @@ allImages.forEach(img => {
             btn.innerText = "進入戰場";
         }
     };
+    // --- 新增：如果載入失敗，會彈出警告話你知邊張圖出事 ---
+    img.onerror = () => {
+        console.error("❌ 無法載入圖片: " + img.src);
+        alert("載入失敗！搵唔到呢張圖片:\n" + img.src + "\n\n請檢查資料夾同檔名！");
+    };
 });
 
 
@@ -579,7 +584,14 @@ function movePlayer(dx, dy) {
         }
     }
 }
-
+// 啟動隨機戰鬥 (草叢遇敵)
+function startRandomBattle() {
+    gameState = "BATTLE";
+    resetMonster(); // 確保怪物血量滿格
+    showActionMenu();
+    document.getElementById('battleLog').innerText = "⚔️ 草叢中衝出了一隻 DSE 考官！";
+}
+    
 // 啟動強制戰鬥
 function startForcedBattle(x, y) {
     // 進入戰鬥狀態
