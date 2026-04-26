@@ -513,9 +513,11 @@ function winBattle() {
         resetMonster(); 
         isBusy = false;
         
-        // 👇 新增呢兩行：戰鬥完結，收起戰鬥選單，叫返方向鍵出嚟
-        document.getElementById('action-menu').style.display = 'none';
-        document.getElementById('dpad-container').style.display = 'flex'; 
+        // 👇 UI 切換處理
+        document.getElementById('action-menu').style.display = 'none'; // 隱藏行動選單
+        document.getElementById('quiz-area').style.display = 'none';   // 👈 新增呢行！強制隱藏題目區
+        document.getElementById('dpad-container').style.display = 'flex'; // 顯示方向鍵
+        
         document.getElementById('battleLog').innerText = "探索中...";
         document.getElementById('battleLog').style.color = "#aaa";
     }, 1500);
