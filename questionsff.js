@@ -1,4 +1,22 @@
 // questions.js
+// ==========================================
+    // 1. 遊戲基礎設定與全域變數 (放喺最頂！)
+    // ==========================================
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    let gameState = "MAP"; // 你原本應該已經有呢啲變數
+
+    // 👇 將關卡設定加喺呢度！
+    let currentLevel = 1; // 記錄玩家目前打緊第幾關
+    const levelConfigs = {
+        1: { name: "代數之森", monsterName: "代數史萊姆", monsterHp: 100 },
+        2: { name: "幾何遺跡", monsterName: "幾何石魔", monsterHp: 150 },
+        3: { name: "座標峽谷", monsterName: "坐標飛龍", monsterHp: 200 },
+        4: { name: "三角神殿", monsterName: "三角祭司", monsterHp: 250 },
+        5: { name: "統計高塔", monsterName: "統計巨人", monsterHp: 300 },
+        6: { name: "綜合深淵", monsterName: "DSE 終極魔王", monsterHp: 500 }
+    };
+
 const DSE_Library = {
     // 第一關問題
     // ==========================================
