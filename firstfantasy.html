@@ -45,22 +45,6 @@
             height: 0; /* 高度交由 flex 決定 */
             object-fit: contain; /* 關鍵魔法：確保原本 600x300 的畫布比例不變，並自動縮放至最大 */
         }
-        /* 1. 包住整個遊戲嘅最外層大框 (Body 或者一個圍住晒所有嘢嘅 Div) */
-        #main-container {
-            display: flex;
-            flex-direction: column;
-            height: 100dvh; /* 推薦用 dvh (Dynamic Viewport Height)，佢會自動扣除手機瀏覽器上下條網址列，避免畫面被遮住 */
-            width: 100vw;
-            overflow: hidden; /* 防止整個網頁出現上下捲動，鎖死畫面 */
-            background-color: #000;
-        }
-
-        /* 2. 上方地圖 / 對戰畫面 */
-        #game-view {
-            flex-grow: 1; /* 關鍵：設定為 1，佢就會自動「撐大」，霸佔 UI 面板以外嘅所有剩餘空間 */
-            position: relative;
-            /* 視乎你地圖大細，可能需要加 overflow: hidden; 或者容許地圖捲動 */
-        }
 
         /* 3. 你寫嘅 UI 面板 (放喺 #game-view 下面) */
         #ui-panel { 
