@@ -133,15 +133,18 @@ const assets = {
     background: new Image(), player: new Image(), monster: new Image(),
     tileGround: new Image(), tileWall: new Image(), tileGrass: new Image(),
     // 新增：戰敗圖片
-    playerDead: new Image(), 
-    monsterDead: new Image()
+    playerDead: new Image(),    monsterDead: new Image()
+    // 新增：3隻怪獸 + 1隻Boss
+    monster1: new Image(), monster2: new Image(), monster3: new Image(),
+    boss: new Image()    
 };
 
 let loadedCount = 0;
 const allImages = [
-    assets.background, assets.player, assets.monster, 
+    assets.background, assets.player, 
     assets.tileGround, assets.tileWall, assets.tileGrass,
-    assets.playerDead, assets.monsterDead
+    assets.playerDead, assets.monsterDead,
+    assets.monster1, assets.monster2, assets.monster3, assets.boss
 ];
 
 // 先設定 onload 同 onerror 監聽器
@@ -162,12 +165,16 @@ allImages.forEach(img => {
 // 最後先一次過設定 src 路徑，觸發載入
 assets.background.src = './img/ff/bg_forest.png'; 
 assets.player.src = './img/ff/character.png';
-assets.monster.src = './img/ff/monster1.png';
 assets.tileGround.src = './img/ff/ground.png'; 
 assets.tileWall.src = './img/ff/tree.png';     
 assets.tileGrass.src = './img/ff/grass.png';
 assets.playerDead.src = './img/ff/player_dead.png';   // 勇者戰敗圖
 assets.monsterDead.src = './img/ff/monster_dead.png'; // 怪物戰敗圖
+    // 設定新怪獸路徑
+assets.monster1.src = './img/ff/monster1.png';
+assets.monster2.src = './img/ff/monster2.png';
+assets.monster3.src = './img/ff/monster3.png';
+assets.boss.src = './img/ff/boss.png';
 
 let damageTexts = [];
 let playerName = "";
@@ -177,6 +184,16 @@ let currentQ = null;
 let gameState = "MAP"; // 初始狀態是地圖探索
 let transitionTimer = 0; // 用嚟計時閃爍咗幾耐
 let isForcedBattle = false; // 紀錄係咪踩中機關
+let encounterType = "NONE"; // 紀錄遇敵類型："RANDOM"(隨機), "TRAP"(機關), "BOSS"(王)
+
+// --- 新增：怪物資料庫 ---
+const regularMonsters = [
+    { name: "DSE 數學小兵", hp: 100, atk: 15, img: assets.monster1 },
+    { name: "MC 題惡魔", hp: 120, atk: 20, img: assets.monster2 },
+    { name: "長題目巨獸", hp: 150, atk: 25, img: assets.monster3 }
+];
+    
+const bossData = { name: "最終考官・考評局局長", hp: 300, atk: 40, img: assets.boss };
     
 // 0=平地, 1=牆壁, 2=草叢(隨機遇敵), 3=隱藏機關(強制遇敵)
 
@@ -186,7 +203,7 @@ const mapData = [
     [1, 2, 1, 1, 2, 1, 1, 0, 0, 0, 1, 1, 1, 2, 1],
     [1, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 1], // 這裡放了兩個隱藏機關
     [1, 2, 1, 0, 1, 1, 1, 2, 2, 0, 0, 0, 2, 2, 1],
-    [1, 2, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 0, 0, 1, 2, 2, 2, 2, 2, 2, 4, 2, 2, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]; 
 const TILE_SIZE = 40; // 每個格子的大小（像素）   
@@ -532,6 +549,18 @@ function resetMonster() {
     const canvas = document.getElementById('battleCanvas');
     canvas.style.filter = "none"; // 清除狂暴化濾鏡
 }
+// --- 替換原本的 resetMonster 函式 ---
+// 根據傳入嘅資料嚟設定目前嘅怪獸
+function setMonsterData(data) {
+    monster.name = data.name;
+    monster.maxHp = data.hp;
+    monster.hp = data.hp;
+    monster.displayHp = data.hp;
+    monster.atk = data.atk;
+    monster.img = data.img;
+    document.getElementById('battleCanvas').style.filter = "none"; // 清除狂暴濾鏡
+}
+
 
 function finishGame(msg) {
     document.getElementById('battleLog').innerText = msg;
@@ -556,20 +585,18 @@ function drawMap() {
             let x = col * TILE_SIZE;
             let y = row * TILE_SIZE;
 
-            // 預設畫平地 (包含 0 號平地 同埋 3 號隱藏機關)
-            let imgToDraw = assets.tileGround; 
+            // 先統一畫平地打底
+            ctx.drawImage(assets.tileGround, x, y, TILE_SIZE, TILE_SIZE);
 
-            // 根據數字決定用邊張圖
+            // 根據數字疊加上去
             if (tile === 1) {
-                imgToDraw = assets.tileWall;  // 1 號畫牆壁
+                ctx.drawImage(assets.tileWall, x, y, TILE_SIZE, TILE_SIZE);
             } else if (tile === 2) {
-                imgToDraw = assets.tileGrass; // 2 號畫草叢
+                ctx.drawImage(assets.tileGrass, x, y, TILE_SIZE, TILE_SIZE);
+            } else if (tile === 4) {
+                ctx.drawImage(assets.boss, x, y, TILE_SIZE, TILE_SIZE); // 畫 Boss 喺地圖上
             }
-
-            // 畫出圖片 (自動縮放到 TILE_SIZE 大小)
-            ctx.drawImage(imgToDraw, x, y, TILE_SIZE, TILE_SIZE);
             
-            // (選填) 如果你想保留淡淡嘅黑色格線方便睇位，可以保留下面兩行：
             ctx.strokeStyle = "rgba(0,0,0,0.1)";
             ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
         }
@@ -588,19 +615,21 @@ function movePlayer(dx, dy) {
 
     let currentTile = mapData[nextY][nextX];
 
-    // 處理隱藏機關 (Tile 3)
-    if (currentTile === 3) {
+    if (currentTile === 4) {
+        document.getElementById('battleLog').innerText = "💀 遇見最終 BOSS！";
+        player.lastTrapPos = {x: nextX, y: nextY}; 
+        encounterType = "BOSS";
+        startEncounterEffect();
+    } else if (currentTile === 3) {
         document.getElementById('battleLog').innerText = "⚠️ 踩到隱藏機關！";
-        player.lastTrapPos = {x: nextX, y: nextY}; // 記低機關位置
-        isForcedBattle = true;
-        startEncounterEffect(); // 啟動遇敵特效
-    } 
-    // 處理普通草叢 (Tile 2)
-    else if (currentTile === 2) {
+        player.lastTrapPos = {x: nextX, y: nextY}; 
+        encounterType = "TRAP";
+        startEncounterEffect();
+    } else if (currentTile === 2) {
         if (Math.random() < 0.15) {
             document.getElementById('battleLog').innerText = "⚠️ 草叢有動靜！";
-            isForcedBattle = false;
-            startEncounterEffect(); // 啟動遇敵特效
+            encounterType = "RANDOM";
+            startEncounterEffect();
         }
     }
 }
@@ -668,16 +697,21 @@ function gameLoop() {
 
         // 3. 閃咗大約 1.5 秒 (90 個 frames) 之後，正式進入戰鬥
         if (transitionTimer > 90) {
-            if (isForcedBattle) {
-                // 機關戰鬥 (唔需要再傳 x, y，因為上面已經記低咗落 lastTrapPos)
-                gameState = "BATTLE";
-                resetMonster(); 
-                showActionMenu();
-                document.getElementById('battleLog').innerText = "怪物出現了！";
+            gameState = "BATTLE";
+            
+            if (encounterType === "BOSS") {
+                // 打 Boss 
+                setMonsterData(bossData);
+                document.getElementById('battleLog').innerText = `💀 最終決戰：${bossData.name} 出現了！`;
             } else {
-                // 草叢隨機戰鬥
-                startRandomBattle();
+                // 抽一隻隨機怪 (機關同草叢都係抽怪)
+                let randomM = regularMonsters[Math.floor(Math.random() * regularMonsters.length)];
+                setMonsterData(randomM);
+                let text = encounterType === "TRAP" ? "機關觸發！" : "草叢衝出了怪物！";
+                document.getElementById('battleLog').innerText = `⚔️ ${text} ${randomM.name} 出現了！`;
             }
+            
+            showActionMenu();
         }
 
     } else if (gameState === "BATTLE") {
