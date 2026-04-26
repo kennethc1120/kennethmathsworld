@@ -129,16 +129,19 @@
 <script src="./questionsff.js"></script>
 <script>
 // --- [1] 素材與數據配置 ---
-// --- [1] 素材與數據配置 ---
 const assets = {
     background: new Image(), player: new Image(), monster: new Image(),
-    tileGround: new Image(), tileWall: new Image(), tileGrass: new Image()
+    tileGround: new Image(), tileWall: new Image(), tileGrass: new Image(),
+    // 新增：戰敗圖片
+    playerDead: new Image(), 
+    monsterDead: new Image()
 };
 
 let loadedCount = 0;
 const allImages = [
     assets.background, assets.player, assets.monster, 
-    assets.tileGround, assets.tileWall, assets.tileGrass
+    assets.tileGround, assets.tileWall, assets.tileGrass,
+    assets.playerDead, assets.monsterDead
 ];
 
 // 先設定 onload 同 onerror 監聽器
@@ -163,7 +166,8 @@ assets.monster.src = './img/ff/monster1.png';
 assets.tileGround.src = './img/ff/ground.png'; 
 assets.tileWall.src = './img/ff/tree.png';     
 assets.tileGrass.src = './img/ff/grass.png';
-
+assets.playerDead.src = './img/ff/player_dead.jpg';   // 勇者戰敗圖
+assets.monsterDead.src = './img/ff/monster_dead.jpg'; // 怪物戰敗圖
 
 let damageTexts = [];
 let playerName = "";
@@ -171,6 +175,9 @@ let score = 0;
 let isBusy = false;
 let currentQ = null;
 let gameState = "MAP"; // 初始狀態是地圖探索
+let transitionTimer = 0; // 用嚟計時閃爍咗幾耐
+let isForcedBattle = false; // 紀錄係咪踩中機關
+    
 // 0=平地, 1=牆壁, 2=草叢(隨機遇敵), 3=隱藏機關(強制遇敵)
 
 const mapData = [
@@ -245,8 +252,13 @@ draw(ctx) {
     }
 
     // 2. 畫出角色圖片
-    ctx.drawImage(this.img, rx, this.y, this.w, this.h);
-    ctx.filter = "none"; // 畫完圖片後重設濾鏡，避免影響後面的條狀圖
+    let imgToDraw = this.img; // 預設用正常圖片
+    if (this.hp <= 0) {
+        // 如果血量歸零，判斷係主角定怪物，用對應嘅戰敗圖
+        imgToDraw = this.isPlayer ? assets.playerDead : assets.monsterDead;
+    }
+    ctx.drawImage(imgToDraw, rx, this.y, this.w, this.h);    ctx.filter = "none"; 
+    // 畫完圖片後重設濾鏡，避免影響後面的條狀圖
 
     // 3. 繪製血條 (HP Bar)
     const barW = this.w; 
@@ -568,13 +580,17 @@ function movePlayer(dx, dy) {
 
     // 處理隱藏機關 (Tile 3)
     if (currentTile === 3) {
-        document.getElementById('battleLog').innerText = "⚠️ 踩到隱藏機關！怪物出現了！";
-        startForcedBattle(nextX, nextY); 
+        document.getElementById('battleLog').innerText = "⚠️ 踩到隱藏機關！";
+        player.lastTrapPos = {x: nextX, y: nextY}; // 記低機關位置
+        isForcedBattle = true;
+        startEncounterEffect(); // 啟動遇敵特效
     } 
     // 處理普通草叢 (Tile 2)
     else if (currentTile === 2) {
         if (Math.random() < 0.15) {
-            startRandomBattle();
+            document.getElementById('battleLog').innerText = "⚠️ 草叢有動靜！";
+            isForcedBattle = false;
+            startEncounterEffect(); // 啟動遇敵特效
         }
     }
 }
@@ -585,6 +601,15 @@ function startRandomBattle() {
     showActionMenu();
     document.getElementById('battleLog').innerText = "⚔️ 草叢中衝出了一隻 DSE 考官！";
 }
+
+    // 啟動遇敵閃爍特效
+function startEncounterEffect() {
+    gameState = "TRANSITION";
+    transitionTimer = 0;
+    
+    // 隱藏所有 UI，等玩家專心睇特效
+    document.getElementById('ui-panel').style.display = 'none';
+}   
     
 // 啟動強制戰鬥
 function startForcedBattle(x, y) {
@@ -615,27 +640,38 @@ function gameLoop() {
     if (gameState === "MAP") {
         drawMap();
         player.drawOnMap(ctx);
-        
-        // 地圖模式：顯示 UI 面板，顯示方向鍵，隱藏戰鬥選單
-        document.getElementById('ui-panel').style.display = 'block';
-        document.getElementById('dpad-container').style.display = 'flex';
-        document.getElementById('action-menu').style.display = 'none';
-        document.getElementById('quiz-area').style.display = 'none';
-        
-    } else if (gameState === "BATTLE") {
-        ctx.drawImage(assets.background, 0, 0, 600, 300);
-        player.draw(ctx);
-        monster.draw(ctx);
-        
-        // 戰鬥模式：顯示 UI 面板，隱藏方向鍵
-        document.getElementById('ui-panel').style.display = 'block';
-        document.getElementById('dpad-container').style.display = 'none';
+        // ... (保留你原本顯示 UI 嘅代碼) ...
 
-        for (let i = damageTexts.length - 1; i >= 0; i--) {
-            damageTexts[i].update(); 
-            damageTexts[i].draw(ctx);
-            if (damageTexts[i].life <= 0) damageTexts.splice(i, 1);
+    } else if (gameState === "TRANSITION") {
+        // 1. 照樣畫地圖同主角作為底圖
+        drawMap();
+        player.drawOnMap(ctx);
+        
+        // 2. 處理閃爍特效 (每 5 個 frame 轉一次顏色)
+        transitionTimer++;
+        if (transitionTimer % 10 < 5) {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; // 閃白
+        } else {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; // 閃黑
         }
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 3. 閃咗大約 1.5 秒 (90 個 frames) 之後，正式進入戰鬥
+        if (transitionTimer > 90) {
+            if (isForcedBattle) {
+                // 機關戰鬥 (唔需要再傳 x, y，因為上面已經記低咗落 lastTrapPos)
+                gameState = "BATTLE";
+                resetMonster(); 
+                showActionMenu();
+                document.getElementById('battleLog').innerText = "怪物出現了！";
+            } else {
+                // 草叢隨機戰鬥
+                startRandomBattle();
+            }
+        }
+
+    } else if (gameState === "BATTLE") {
+        // ... (保留你原本畫背景、角色、血量嘅代碼) ...
     }
     
     requestAnimationFrame(gameLoop);
