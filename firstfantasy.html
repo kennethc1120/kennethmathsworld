@@ -549,7 +549,8 @@ function checkAnswer(choice) {
             winBattle(); 
             return; 
         }
-        
+      // 👇 加入呢行！每次扣完血，即刻檢查死咗未！
+        checkBattleWin();      
         // 答對的話怪物不反擊，1.5 秒後回到指令選單
         setTimeout(showActionMenu, 1500); 
 
@@ -749,6 +750,49 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') movePlayer(1, 0);
 });    
 
+function checkBattleWin() {
+    // 如果怪物血量扣到 0 或以下
+    if (monster.hp <= 0) {
+        monster.hp = 0; // 防止出現負數血量
+        
+        // 1. 恭喜玩家過關
+        alert("成功擊敗 " + monster.name + "！"); // 你可以之後改用靚啲嘅 UI 彈出視窗
+        
+        // 2. 升級去下一關
+        currentLevel++;
+        
+        // 3. 檢查係咪已經爆機 (打完第 6 關)
+        if (currentLevel > 6) {
+            alert("🎉 恭喜你！你已經通關所有 DSE 數學挑戰！");
+            gameState = "END"; // 或者顯示爆機畫面
+            return;
+        }
+        
+        // 4. 如果未爆機，就生成下一關嘅新怪物！
+        monster = new Character(
+            levelConfigs[currentLevel].monsterName,
+            levelConfigs[currentLevel].monsterHp,
+            levelConfigs[currentLevel].monsterAtk,
+            420, 120, // 初始坐標，入戰鬥會自動重新排位
+            levelConfigs[currentLevel].monsterImg,
+            100, 100,
+            false
+        );
+        
+        // (選擇性) 幫主角補滿血，迎接新挑戰
+        player.hp = player.maxHp; 
+        
+        alert("即將進入第 " + currentLevel + " 關：" + levelConfigs[currentLevel].name);
+        
+        // 5. 將畫面切換返去地圖，等玩家行去下一個挑戰點
+        gameState = "MAP";
+        
+        // 6. 重置戰鬥 UI (確保返到地圖時，問題面板會隱藏)
+        // 假設你有控制面板嘅 display 設定，例如：
+        // document.getElementById("question-panel").style.display = "none";
+    }
+}
+    
 function gameLoop() {
     // 👇 新增：自動同步畫布內部解析度與手機實際大細
     if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
