@@ -344,27 +344,27 @@ draw(ctx) {
     // ----------------------------------------------------
 
     // 5. 繪製名字
-    ctx.fillStyle = "white"; 
-    ctx.font = "bold 12px Arial"; 
-    ctx.textAlign = "center";
-    ctx.fillText(this.name, rx + this.w / 2, this.y - 25); 
-    
-    ctx.restore();
-// --- 新增：在地圖上畫出角色 ---
-// 主角的 drawOnMap 也要改
-    Character.prototype.drawOnMap = function(ctx) {
+        ctx.fillStyle = "white"; 
+        ctx.font = "bold 12px Arial"; 
+        ctx.textAlign = "center";
+        ctx.fillText(this.name, rx + this.w / 2, this.y - 25); 
+        
+        ctx.restore();
+    } // ⬅️ 確保 draw() 喺呢度閂括號完結！
+
+    // --- 將 drawOnMap 獨立放喺 draw() 下面 ---
+    drawOnMap(ctx) {
         let px = this.mapX * TILE_SIZE - camX;
         let py = this.mapY * TILE_SIZE - camY;
         ctx.drawImage(this.img, px, py, TILE_SIZE, TILE_SIZE);
-    } 
-}
+    }
 }
 
 // --- [3] 遊戲邏輯 ---
 const canvas = document.getElementById('battleCanvas');
 const ctx = canvas.getContext('2d');
 const player = new Character("勇者", 100, 40, 80, 140, assets.player, 80, 80, true);
-const monster = new Character("DSE 考官", 150, 25, 420, 120, assets.monster, 100, 100, false);
+const monster = new Character("DSE 考官", 150, 25, 420, 120, assets.monster1, 100, 100, false);
 
 function startGame() {
     playerName = document.getElementById('playerNameInput').value.trim();
@@ -645,7 +645,7 @@ function drawMap() {
             ctx.drawImage(assets.tileGround, x, y, TILE_SIZE, TILE_SIZE);
             if (tile === 1) ctx.drawImage(assets.tileWall, x, y, TILE_SIZE, TILE_SIZE);
             else if (tile === 2) ctx.drawImage(assets.tileGrass, x, y, TILE_SIZE, TILE_SIZE);
-            else if (tile === 4) ctx.drawImage(assets.city, x, y, TILE_SIZE, TILE_SIZE);
+            else if (tile === 4) ctx.drawImage(assets.toround2, x, y, TILE_SIZE, TILE_SIZE);
         }
     }
 }
