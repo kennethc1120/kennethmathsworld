@@ -549,8 +549,7 @@ function checkAnswer(choice) {
             winBattle(); 
             return; 
         }
-      // 👇 加入呢行！每次扣完血，即刻檢查死咗未！
-        checkBattleWin();      
+     
         // 答對的話怪物不反擊，1.5 秒後回到指令選單
         setTimeout(showActionMenu, 1500); 
 
@@ -593,7 +592,7 @@ function enemyTurn() {
 // 新增勝利處理函式
 function winBattle() {
     isBusy = true;
-    document.getElementById('battleLog').innerText = "✌️ 戰鬥勝利！可以繼續前進了。";
+    document.getElementById('battleLog').innerText = "✌️ 戰鬥勝利！";
     document.getElementById('battleLog').style.color = "#4ecca3";
 
     if (player.lastTrapPos) {
@@ -602,22 +601,45 @@ function winBattle() {
     }
 
     score += 100;
+    
+    // 1. 恭喜過關
+    alert(`成功擊敗 ${monster.name}！`);
+    
+    // 2. 關卡升級
+    currentLevel++;
+    if (currentLevel > 6) {
+        alert("🎉 恭喜你！你已經通關所有 DSE 數學挑戰！");
+        gameState = "END";
+        return; // 爆機停止執行
+    }
+    
+    alert(`即將進入第 ${currentLevel} 關：${levelConfigs[currentLevel].name}`);
 
+    // 3. 延遲 1.5 秒後返回地圖，並設定下一關怪獸
     setTimeout(() => {
         gameState = "MAP";
-        resetMonster(); 
+        
+        // 直接用 setMonsterData 裝備下一關嘅怪獸資料
+        let nextConfig = levelConfigs[currentLevel];
+        setMonsterData({
+            name: nextConfig.monsterName,
+            hp: nextConfig.monsterHp,
+            atk: nextConfig.monsterAtk,
+            img: nextConfig.monsterImg
+        });
+        
+        player.hp = player.maxHp; // 過關補滿血
         isBusy = false;
         
-        // 👇 UI 切換處理
-        document.getElementById('action-menu').style.display = 'none'; // 隱藏行動選單
-        document.getElementById('quiz-area').style.display = 'none';   // 👈 新增呢行！強制隱藏題目區
-        document.getElementById('dpad-container').style.display = 'flex'; // 顯示方向鍵
+        // UI 切換處理
+        document.getElementById('action-menu').style.display = 'none'; 
+        document.getElementById('quiz-area').style.display = 'none';   
+        document.getElementById('dpad-container').style.display = 'flex'; 
         
         document.getElementById('battleLog').innerText = "探索中...";
         document.getElementById('battleLog').style.color = "#aaa";
     }, 1500);
 }
-
 // 重置怪物的函式
 function resetMonster() {
     monster.hp = monster.maxHp;
@@ -750,48 +772,7 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') movePlayer(1, 0);
 });    
 
-function checkBattleWin() {
-    // 如果怪物血量扣到 0 或以下
-    if (monster.hp <= 0) {
-        monster.hp = 0; // 防止出現負數血量
-        
-        // 1. 恭喜玩家過關
-        alert("成功擊敗 " + monster.name + "！"); // 你可以之後改用靚啲嘅 UI 彈出視窗
-        
-        // 2. 升級去下一關
-        currentLevel++;
-        
-        // 3. 檢查係咪已經爆機 (打完第 6 關)
-        if (currentLevel > 6) {
-            alert("🎉 恭喜你！你已經通關所有 DSE 數學挑戰！");
-            gameState = "END"; // 或者顯示爆機畫面
-            return;
-        }
-        
-        // 4. 如果未爆機，就生成下一關嘅新怪物！
-        monster = new Character(
-            levelConfigs[currentLevel].monsterName,
-            levelConfigs[currentLevel].monsterHp,
-            levelConfigs[currentLevel].monsterAtk,
-            420, 120, // 初始坐標，入戰鬥會自動重新排位
-            levelConfigs[currentLevel].monsterImg,
-            100, 100,
-            false
-        );
-        
-        // (選擇性) 幫主角補滿血，迎接新挑戰
-        player.hp = player.maxHp; 
-        
-        alert("即將進入第 " + currentLevel + " 關：" + levelConfigs[currentLevel].name);
-        
-        // 5. 將畫面切換返去地圖，等玩家行去下一個挑戰點
-        gameState = "MAP";
-        
-        // 6. 重置戰鬥 UI (確保返到地圖時，問題面板會隱藏)
-        // 假設你有控制面板嘅 display 設定，例如：
-        // document.getElementById("question-panel").style.display = "none";
-    }
-}
+
     
 function gameLoop() {
     // 👇 新增：自動同步畫布內部解析度與手機實際大細
@@ -824,17 +805,19 @@ function gameLoop() {
         if (transitionTimer > 90) {
             gameState = "BATTLE";
             
-            if (encounterType === "BOSS") {
-                // 打 Boss 
-                setMonsterData(bossData);
-                document.getElementById('battleLog').innerText = `💀 最終決戰：${bossData.name} 出現了！`;
-            } else {
-                // 抽一隻隨機怪 (機關同草叢都係抽怪)
-                let randomM = regularMonsters[Math.floor(Math.random() * regularMonsters.length)];
-                setMonsterData(randomM);
-                let text = encounterType === "TRAP" ? "機關觸發！" : "草叢衝出了怪物！";
-                document.getElementById('battleLog').innerText = `⚔️ ${text} ${randomM.name} 出現了！`;
-            }
+            // 👇 修改呢度：統一讀取目前關卡 (currentLevel) 嘅怪獸設定
+            let currentConfig = levelConfigs[currentLevel];
+            setMonsterData({
+                name: currentConfig.monsterName,
+                hp: currentConfig.monsterHp,
+                atk: currentConfig.monsterAtk,
+                img: currentConfig.monsterImg
+            });
+            
+            let text = encounterType === "TRAP" ? "機關觸發！" : "進入戰鬥！";
+            if (encounterType === "BOSS") text = "最終決戰！";
+            
+            document.getElementById('battleLog').innerText = `⚔️ ${text} ${currentConfig.monsterName} 出現了！`;
             
             showActionMenu();
         }
