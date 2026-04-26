@@ -322,8 +322,11 @@ function startGame() {
     // 初始化設定為地圖模式
     gameState = "MAP"; 
     
-    // 隱藏 UI 面板，讓玩家看完整地圖
-    document.getElementById('ui-panel').style.display = 'none';
+    // 👇 修改呢度：顯示主面板，顯示方向鍵，但隱藏戰鬥 UI
+    document.getElementById('ui-panel').style.display = 'block';
+    document.getElementById('dpad-container').style.display = 'flex';
+    document.getElementById('action-menu').style.display = 'none';
+    document.getElementById('quiz-area').style.display = 'none';   
     
     gameLoop();
 }
@@ -391,9 +394,11 @@ let currentAction = 'attack';
 // 1. 顯示指令選單 (每回合開始時呼叫)
 function showActionMenu() {
     isBusy = false;
+    // 👇 新增/修改呢幾行：確保主面板顯示，隱藏方向鍵，顯示戰鬥選單
+    document.getElementById('ui-panel').style.display = 'block'; 
+    document.getElementById('dpad-container').style.display = 'none'; 
     document.getElementById('action-menu').style.display = 'block';
-    document.getElementById('quiz-area').style.display = 'none';
-    
+    document.getElementById('quiz-area').style.display = 'none';    
     // 檢查能量是否滿 100，決定要不要顯示必殺技
     const ultBtn = document.getElementById('ult-btn');
     if (player.sp >= 100) {
@@ -496,20 +501,23 @@ function winBattle() {
     document.getElementById('battleLog').innerText = "✌️ 戰鬥勝利！可以繼續前進了。";
     document.getElementById('battleLog').style.color = "#4ecca3";
 
-    // 1. 如果是踩到機關觸發的，把該格機關消滅掉，變成普通地板
     if (player.lastTrapPos) {
         mapData[player.lastTrapPos.y][player.lastTrapPos.x] = 0;
-        player.lastTrapPos = null; // 清除記錄
+        player.lastTrapPos = null; 
     }
 
-    // 2. 增加分數
     score += 100;
 
-    // 3. 延遲 1.5 秒後回到地圖，給玩家一點成就感時間
     setTimeout(() => {
         gameState = "MAP";
-        resetMonster(); // 為下一場戰鬥準備
+        resetMonster(); 
         isBusy = false;
+        
+        // 👇 新增呢兩行：戰鬥完結，收起戰鬥選單，叫返方向鍵出嚟
+        document.getElementById('action-menu').style.display = 'none';
+        document.getElementById('dpad-container').style.display = 'flex'; 
+        document.getElementById('battleLog').innerText = "探索中...";
+        document.getElementById('battleLog').style.color = "#aaa";
     }, 1500);
 }
 
@@ -671,7 +679,19 @@ function gameLoop() {
         }
 
     } else if (gameState === "BATTLE") {
-        // ... (保留你原本畫背景、角色、血量嘅代碼) ...
+        // 1. 畫戰鬥背景
+        ctx.drawImage(assets.background, 0, 0, canvas.width, canvas.height);
+        
+        // 2. 畫主角同怪物
+        player.draw(ctx);
+        monster.draw(ctx);
+        
+        // 3. 畫受傷數字
+        damageTexts.forEach((text, index) => {
+            text.update();
+            text.draw(ctx);
+            if (text.life <= 0) damageTexts.splice(index, 1);
+        });
     }
     
     requestAnimationFrame(gameLoop);
