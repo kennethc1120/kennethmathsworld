@@ -451,38 +451,38 @@ function nextQuestion() {
     const hpPercent = monster.hp / monster.maxHp;
     const canvas = document.getElementById('battleCanvas');
 
+    // 🌟 關鍵修改：首先攞出目前關卡 (currentLevel) 嘅專屬題庫！
+    // 如果冇嗰關嘅題目，就預設用第 1 關，防止死機
+    let currentLevelQuestions = DSE_Library[currentLevel] || DSE_Library[1];
+
     // 難度與背景顏色判定
     if (hpPercent > 0.7) {
-        // 第一階段：正常狀態
-        pool = DSE_Library.easy;
-        canvas.style.filter = "none"; // 回復正常
+        // 第一階段：正常狀態 (抽 easy 題目)
+        pool = currentLevelQuestions.easy; 
+        canvas.style.filter = "none"; 
         document.getElementById('battleLog').innerText = "第一階段：基礎試煉";
         document.getElementById('battleLog').style.color = "#aaa";
     } 
     else if (hpPercent > 0.3) {
-        // 第二階段：黃昏/警戒狀態
-        pool = DSE_Library.normal;
-        // 增加飽和度與色調偏移，讓畫面偏黃/橘
+        // 第二階段：黃昏/警戒狀態 (抽 normal 題目)
+        pool = currentLevelQuestions.normal;
         canvas.style.filter = "saturate(1.5) hue-rotate(-10deg) sepia(0.2)";
         document.getElementById('battleLog').innerText = "第二階段：進階挑戰！";
         document.getElementById('battleLog').style.color = "#ffd54f";
     } 
     else {
-        // 第三階段：狂暴狀態
-        pool = DSE_Library.hard;
-        // 劇烈的色調偏移（偏紅）與高對比，模擬危機感
+        // 第三階段：狂暴狀態 (抽 hard 題目)
+        pool = currentLevelQuestions.hard;
         canvas.style.filter = "saturate(2.5) hue-rotate(-40deg) contrast(1.2)";
         document.getElementById('battleLog').innerText = "最終階段：考官狂暴化！！";
         document.getElementById('battleLog').style.color = "#ff4d4d";
-        
-        // 資深開發者技巧：狂暴時怪物攻擊力增加
         monster.atk = 35; 
     }
 
     // 隨機抽題邏輯
     currentQ = pool[Math.floor(Math.random() * pool.length)];
     
-    // 更新介面 (渲染選項按鈕)
+    // 更新介面
     renderOptions();
 }
 
