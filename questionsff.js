@@ -9,12 +9,12 @@
     // 👇 將關卡設定加喺呢度！
     let currentLevel = 1; // 記錄玩家目前打緊第幾關
     const levelConfigs = {
-        1: { name: "代數之森", monsterName: "代數史萊姆", monsterHp: 100 },
-        2: { name: "幾何遺跡", monsterName: "幾何石魔", monsterHp: 150 },
-        3: { name: "座標峽谷", monsterName: "坐標飛龍", monsterHp: 200 },
-        4: { name: "三角神殿", monsterName: "三角祭司", monsterHp: 250 },
-        5: { name: "統計高塔", monsterName: "統計巨人", monsterHp: 300 },
-        6: { name: "綜合深淵", monsterName: "DSE 終極魔王", monsterHp: 500 }
+        1: { name: "代數之森", monsterName: "代數小兵", monsterHp: 150, monsterAtk: 25, monsterImg: assets.monster1 },
+        2: { name: "幾何遺跡", monsterName: "幾何石魔", monsterHp: 200, monsterAtk: 35, monsterImg: assets.monster2 },
+        3: { name: "座標峽谷", monsterName: "坐標飛龍", monsterHp: 200, monsterAtk: 45, monsterImg: assets.monster2 },
+        4: { name: "三角神殿", monsterName: "三角祭司", monsterHp: 250, monsterAtk: 50, monsterImg: assets.monster2 },
+        5: { name: "統計高塔", monsterName: "統計巨人", monsterHp: 300, monsterAtk: 65, monsterImg: assets.monster2 },
+        6: { name: "綜合深淵", monsterName: "DSE 終極魔王", monsterHp: 500, monsterAtk: 80, monsterImg: assets.monster2 },
     };
 
 const DSE_Library = {
