@@ -159,9 +159,21 @@
 <script src="./questionsff.js"></script>
 <script>
 // ==========================================
-// 1. 遊戲基礎設定與全域變數 (一定要放喺 script 入面！)
+// 1. 遊戲基礎設定與全域變數
 // ==========================================
 let currentLevel = 1; 
+
+// 🌟 第一步：先宣告所有 assets (圖片素材)
+const assets = {
+    background: new Image(), player: new Image(), monster: new Image(),
+    tileGround: new Image(), tileWall: new Image(), tileGrass: new Image(),
+    playerDead: new Image(), monsterDead: new Image(),
+    monster1: new Image(), monster2: new Image(), monster3: new Image(),
+    boss: new Image(),
+    toround2: new Image() 
+};
+
+// 🌟 第二步：先至設定 levelConfigs (因為呢度需要用到 assets)
 const levelConfigs = {
     1: { name: "代數之森", monsterName: "代數小兵", monsterHp: 150, monsterAtk: 25, monsterImg: assets.monster1 },
     2: { name: "幾何遺跡", monsterName: "幾何石魔", monsterHp: 200, monsterAtk: 35, monsterImg: assets.monster2 },
@@ -169,17 +181,6 @@ const levelConfigs = {
     4: { name: "三角神殿", monsterName: "三角祭司", monsterHp: 250, monsterAtk: 50, monsterImg: assets.monster2 },
     5: { name: "統計高塔", monsterName: "統計巨人", monsterHp: 300, monsterAtk: 65, monsterImg: assets.monster2 },
     6: { name: "綜合深淵", monsterName: "DSE 終極魔王", monsterHp: 500, monsterAtk: 80, monsterImg: assets.boss },
-};
-// --- [1] 素材與數據配置 ---
-const assets = {
-    background: new Image(), player: new Image(), monster: new Image(),
-    tileGround: new Image(), tileWall: new Image(), tileGrass: new Image(),
-    // 新增：戰敗圖片
-    playerDead: new Image(),    monsterDead: new Image(),
-    // 新增：3隻怪獸 + 1隻Boss
-    monster1: new Image(), monster2: new Image(), monster3: new Image(),
-    boss: new Image(),
-    toround2: new Image() // ⬅️ 新增：傳去第2關的市圖片
 };
 
 let loadedCount = 0;
