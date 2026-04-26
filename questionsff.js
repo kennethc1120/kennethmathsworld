@@ -75,4 +75,4 @@ const DSE_Library = {
     { level: 1, difficulty: "advanced", question: "十六進制 A1(16) 轉換為十進制是？", options: ["160", "161", "162", "171"], answer: 1 },
     { level: 1, difficulty: "advanced", question: "若 log(y) = 2*log(x) + 1，將 y 表達為 x 的函數", options: ["y=2x+1", "y=10x^2", "y=x^2+10", "y=20x"], answer: 1 },
     { level: 1, difficulty: "advanced", question: "已知 f(x) = 2x+1，若 f(a) = 9，求 a", options: ["3", "4", "5", "19"], answer: 1 }
-];
+};
