@@ -157,12 +157,12 @@ allImages.forEach(img => {
 });
 
 // 最後先一次過設定 src 路徑，觸發載入
-assets.background.src = './img/bg_forest.png'; 
-assets.player.src = './img/character.png';
-assets.monster.src = './img/monster1.png';
-assets.tileGround.src = './img/ground.png'; 
-assets.tileWall.src = './img/tree.png';     
-assets.tileGrass.src = './img/grass.png';
+assets.background.src = './img/ff/bg_forest.png'; 
+assets.player.src = './img/ff/character.png';
+assets.monster.src = './img/ff/monster1.png';
+assets.tileGround.src = './img/ff/ground.png'; 
+assets.tileWall.src = './img/ff/tree.png';     
+assets.tileGrass.src = './img/ff/grass.png';
 
 
 let damageTexts = [];
@@ -172,6 +172,7 @@ let isBusy = false;
 let currentQ = null;
 let gameState = "MAP"; // 初始狀態是地圖探索
 // 0=平地, 1=牆壁, 2=草叢(隨機遇敵), 3=隱藏機關(強制遇敵)
+
 const mapData = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 2, 2, 2, 3, 2, 2, 0, 0, 2, 2, 2, 2, 2, 1],
@@ -180,7 +181,7 @@ const mapData = [
     [1, 2, 1, 0, 1, 1, 1, 2, 2, 0, 0, 0, 2, 2, 1],
     [1, 2, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-};
+]; 
 const TILE_SIZE = 40; // 每個格子的大小（像素）   
 // --- [2] 核心類別 ---
 class FloatingText {
