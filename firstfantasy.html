@@ -231,11 +231,12 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
         grassImg: assets.tileGrass,   // 第一關草地
         startX: 1, startY: 1,         // 主角第一關出世位置
         // 第一關 Boss
-        monsterName: "代數小兵", monsterHp: 150, monsterAtk: 25, monsterImg: assets.monster1,
+        monsterName: "代數小王子", monsterHp: 150, monsterAtk: 25, monsterImg: assets.boss,
         // 第一關專屬草叢小怪
         mobs: [
-            { name: "DSE 數學小兵", hp: 100, atk: 15, img: assets.monster1 },
-            { name: "MC 題惡魔", hp: 120, atk: 20, img: assets.monster2 }
+            { name: "數學小兵", hp: 100, atk: 12, img: assets.monster1 },
+            { name: "Log Buddy", hp: 120, atk: 14, img: assets.monster2 },
+            { name: "方程 惡魔", hp: 150, atk: 10, img: assets.monster3 }
         ]
     },
     2: { 
@@ -250,8 +251,9 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
         monsterName: "幾何石魔", monsterHp: 200, monsterAtk: 35, monsterImg: assets.boss2,
         // 第二關專屬草叢小怪 (🌟 新怪物！)
         mobs: [
-            { name: "三角函數兵", hp: 130, atk: 22, img: assets.monster1b },
-            { name: "圓形巨石", hp: 180, atk: 18, img: assets.monster2b }
+            { name: "正方形兵", hp: 130, atk: 20, img: assets.monster1b },
+            { name: "圓形巨石", hp: 180, atk: 18, img: assets.monster2b },
+            { name: "SSS烏龜", hp: 200, atk: 15, img: assets.monster3b }
         ]
     }
     // ... 可以繼續加 3, 4, 5, 6 關 ...
