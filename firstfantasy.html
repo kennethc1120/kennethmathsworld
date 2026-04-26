@@ -6,8 +6,16 @@
     <title>DSE Math First Fantasy</title>
     <style>
         :root { --main-bg: #1a1a2e; --ui-panel: #16213e; --accent: #4ecca3; }
-        body { background: var(--main-bg); color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; }
-        
+        body { 
+            background: var(--main-bg); 
+            color: #fff; 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            padding: 0;
+            overflow: hidden; 
+            height: 100dvh; /* 關鍵：強制佔滿手機螢幕高度 (包含扣除網址列) */
+            width: 100vw;   /* 關鍵：強制佔滿寬度 */
+        }        
         /* 啟動遮罩 */
         #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
@@ -20,23 +28,33 @@
 
         /* 遊戲容器 */
         #game-wrapper {
-            margin-top: 20px;
-            border: 4px solid #fff;
-            border-radius: 8px;
-            width: 95%;        /* 改為佔螢幕 95% */
-            max-width: 800px;  /* 設定最大上限，避免在大螢幕太闊 */
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%; /* 跟隨 body 的高度 */
+            margin: 0;
+            border: none; /* 迎合手機全螢幕，移除原本的白邊框 */
+            border-radius: 0;
         }
 
         canvas {
             background: #232946;
             display: block;
-            width: 100%;       /* 讓畫布跟隨容器寬度自動縮放 */
-            height: auto;      /* 保持比例 */
+            flex: 1; /* 關鍵：自動霸佔上方所有剩餘空間，將 UI 面板向下推 */
+            width: 100%;
+            height: 0; /* 高度交由 flex 決定 */
+            object-fit: contain; /* 關鍵魔法：確保原本 600x300 的畫布比例不變，並自動縮放至最大 */
         }
         /* UI 面板 */
-        #ui-panel { background: var(--ui-panel); padding: 20px; box-sizing: border-box; border-top: 2px solid #fff; }
+        #ui-panel { 
+            background: var(--ui-panel); 
+            padding: 20px; 
+            padding-bottom: env(safe-area-inset-bottom, 20px); /* 避開 iPhone 底部 Home 橫條 */
+            box-sizing: border-box; 
+            border-top: 2px solid #fff; 
+            min-height: 250px; /* 固定最小高度 */
+            flex-shrink: 0; /* 關鍵：防止面板被上方的遊戲畫面擠壓變形 */
+        }
         #question { font-size: 20px; color: var(--accent); min-height: 60px; text-align: center; font-weight: bold; line-height: 1.4; }
         
         .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
