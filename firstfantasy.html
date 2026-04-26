@@ -121,7 +121,7 @@
 <body>
 
 <div id="start-screen">
-    <h1 style="color:var(--accent)">數學First Fantasy4</h1>
+    <h1 style="color:var(--accent)">數學First Fantasy4b</h1>
     <input type="text" id="playerNameInput" placeholder="輸入玩家姓名..." maxlength="10">
     <button id="startBtn" onclick="startGame()" disabled>素材載入中...</button>
 </div>
@@ -182,13 +182,40 @@ const assets = {
 };
 
 // 🌟 第二步：先至設定 levelConfigs (因為呢度需要用到 assets)
-const levelConfigs = {
-    1: { name: "代數之森", monsterName: "代數小兵", monsterHp: 150, monsterAtk: 25, monsterImg: assets.monster1 },
-    2: { name: "幾何遺跡", monsterName: "幾何石魔", monsterHp: 200, monsterAtk: 35, monsterImg: assets.monster2 },
-    3: { name: "座標峽谷", monsterName: "坐標飛龍", monsterHp: 200, monsterAtk: 45, monsterImg: assets.monster2 },
-    4: { name: "三角神殿", monsterName: "三角祭司", monsterHp: 250, monsterAtk: 50, monsterImg: assets.monster2 },
-    5: { name: "統計高塔", monsterName: "統計巨人", monsterHp: 300, monsterAtk: 65, monsterImg: assets.monster2 },
-    6: { name: "綜合深淵", monsterName: "DSE 終極魔王", monsterHp: 500, monsterAtk: 80, monsterImg: assets.boss },
+    const levelConfigs = {
+    1: { 
+        name: "代數之森", 
+        mapGrid: mapLevel1,           // 第一關用地圖 1
+        bgImg: assets.background,     // 第一關戰鬥背景
+        groundImg: assets.tileGround, // 第一關平地
+        wallImg: assets.tileWall,     // 第一關牆壁        
+        grassImg: assets.tileGrass,   // 第一關草地
+        startX: 1, startY: 1,         // 主角第一關出世位置
+        // 第一關 Boss
+        monsterName: "代數小兵", monsterHp: 150, monsterAtk: 25, monsterImg: assets.monster1,
+        // 第一關專屬草叢小怪
+        mobs: [
+            { name: "DSE 數學小兵", hp: 100, atk: 15, img: assets.monster1 },
+            { name: "MC 題惡魔", hp: 120, atk: 20, img: assets.monster2 }
+        ]
+    },
+    2: { 
+        name: "幾何遺跡", 
+        mapGrid: mapLevel2,            // 第二關用地圖 2
+        bgImg: assets.background2,        // 🌟 第二關新戰鬥背景
+        groundImg: assets.tileGround2, // 🌟 第二關新平地
+        wallImg: assets.tileWall2,     // 🌟 第二關新牆壁
+        grassImg: assets.tileGrass2,   // 第二關新草地
+        startX: 1, startY: 3,          // 主角第二關出世位置
+        // 第二關 Boss
+        monsterName: "幾何石魔", monsterHp: 200, monsterAtk: 35, monsterImg: assets.boss2,
+        // 第二關專屬草叢小怪 (🌟 新怪物！)
+        mobs: [
+            { name: "三角函數兵", hp: 130, atk: 22, img: assets.monster1b },
+            { name: "圓形巨石", hp: 180, atk: 18, img: assets.monster2b }
+        ]
+    }
+    // ... 可以繼續加 3, 4, 5, 6 關 ...
 };
 
 let loadedCount = 0;
@@ -249,41 +276,7 @@ assets.monster3b.src = './img/ff/monster3.png';
 assets.boss2.src = './img/ff/boss1.png';
 assets.toround3.src = './img/ff/toround2.png';
 
-    const levelConfigs = {
-    1: { 
-        name: "代數之森", 
-        mapGrid: mapLevel1,           // 第一關用地圖 1
-        bgImg: assets.background,     // 第一關戰鬥背景
-        groundImg: assets.tileGround, // 第一關平地
-        wallImg: assets.tileWall,     // 第一關牆壁        
-        grassImg: assets.tileGrass,   // 第一關草地
-        startX: 1, startY: 1,         // 主角第一關出世位置
-        // 第一關 Boss
-        monsterName: "代數小兵", monsterHp: 150, monsterAtk: 25, monsterImg: assets.monster1,
-        // 第一關專屬草叢小怪
-        mobs: [
-            { name: "DSE 數學小兵", hp: 100, atk: 15, img: assets.monster1 },
-            { name: "MC 題惡魔", hp: 120, atk: 20, img: assets.monster2 }
-        ]
-    },
-    2: { 
-        name: "幾何遺跡", 
-        mapGrid: mapLevel2,            // 第二關用地圖 2
-        bgImg: assets.background2,        // 🌟 第二關新戰鬥背景
-        groundImg: assets.tileGround2, // 🌟 第二關新平地
-        wallImg: assets.tileWall2,     // 🌟 第二關新牆壁
-        grassImg: assets.tileGrass2,   // 第二關新草地
-        startX: 1, startY: 3,          // 主角第二關出世位置
-        // 第二關 Boss
-        monsterName: "幾何石魔", monsterHp: 200, monsterAtk: 35, monsterImg: assets.boss2,
-        // 第二關專屬草叢小怪 (🌟 新怪物！)
-        mobs: [
-            { name: "三角函數兵", hp: 130, atk: 22, img: assets.monster1b },
-            { name: "圓形巨石", hp: 180, atk: 18, img: assets.monster2b }
-        ]
-    }
-    // ... 可以繼續加 3, 4, 5, 6 關 ...
-};
+
     
 let damageTexts = [];
 let playerName = "";
