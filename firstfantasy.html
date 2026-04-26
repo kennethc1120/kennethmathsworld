@@ -623,31 +623,26 @@ function winBattle() {
 
     score += 100;
     
-    // 1. 恭喜過關
-    alert(`成功擊敗 ${monster.name}！`);
-    
-    // 2. 關卡升級
-    currentLevel++;
-    if (currentLevel > 6) {
-        alert("🎉 恭喜你！你已經通關所有 DSE 數學挑戰！");
-        gameState = "END";
-        return; // 爆機停止執行
+    // 判斷係打小怪定打 Boss
+    if (encounterType === "BOSS") {
+        alert(`成功擊敗 ${monster.name}！`);
+        currentLevel++;
+        
+        if (currentLevel > 6) {
+            alert("🎉 恭喜你！你已經通關所有 DSE 數學挑戰！");
+            gameState = "END";
+            return; // 爆機停止執行
+        }
+        
+        alert(`即將進入第 ${currentLevel} 關：${levelConfigs[currentLevel].name}`);
+    } else {
+        // 如果只係普通小怪或機關
+        alert(`成功擊退了 ${monster.name}！獲得經驗！`);
     }
-    
-    alert(`即將進入第 ${currentLevel} 關：${levelConfigs[currentLevel].name}`);
 
-    // 3. 延遲 1.5 秒後返回地圖，並設定下一關怪獸
+    // 延遲 1.5 秒後返回地圖
     setTimeout(() => {
         gameState = "MAP";
-        
-        // 直接用 setMonsterData 裝備下一關嘅怪獸資料
-        let nextConfig = levelConfigs[currentLevel];
-        setMonsterData({
-            name: nextConfig.monsterName,
-            hp: nextConfig.monsterHp,
-            atk: nextConfig.monsterAtk,
-            img: nextConfig.monsterImg
-        });
         
         player.hp = player.maxHp; // 過關補滿血
         isBusy = false;
@@ -796,7 +791,7 @@ window.addEventListener('keydown', (e) => {
 
     
 function gameLoop() {
-    // 👇 新增：自動同步畫布內部解析度與手機實際大細
+    // 自動同步畫布內部解析度與手機實際大細
     if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.clientHeight;
@@ -806,64 +801,79 @@ function gameLoop() {
     if (gameState === "MAP") {
         drawMap();
         player.drawOnMap(ctx);
-        // ... (保留你原本顯示 UI 嘅代碼) ...
 
     } else if (gameState === "TRANSITION") {
-        // 1. 照樣畫地圖同主角作為底圖
         drawMap();
         player.drawOnMap(ctx);
         
-        // 2. 處理閃爍特效 (每 5 個 frame 轉一次顏色)
         transitionTimer++;
         if (transitionTimer % 10 < 5) {
-            ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; // 閃白
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; 
         } else {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; // 閃黑
+            ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; 
         }
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 3. 閃咗大約 1.5 秒 (90 個 frames) 之後，正式進入戰鬥
+        // 閃咗大約 1.5 秒之後，正式進入戰鬥
         if (transitionTimer > 90) {
             gameState = "BATTLE";
             
-            // 👇 修改呢度：統一讀取目前關卡 (currentLevel) 嘅怪獸設定
-            let currentConfig = levelConfigs[currentLevel];
-            setMonsterData({
-                name: currentConfig.monsterName,
-                hp: currentConfig.monsterHp,
-                atk: currentConfig.monsterAtk,
-                img: currentConfig.monsterImg
-            });
-            
-            let text = encounterType === "TRAP" ? "機關觸發！" : "進入戰鬥！";
-            if (encounterType === "BOSS") text = "最終決戰！";
-            
-            document.getElementById('battleLog').innerText = `⚔️ ${text} ${currentConfig.monsterName} 出現了！`;
+            // 🌟 關鍵修復：區分遇敵類型
+            if (encounterType === "RANDOM" || encounterType === "TRAP") {
+                // 隨機抽一隻普通怪物
+                let randomMob = regularMonsters[Math.floor(Math.random() * regularMonsters.length)];
+                setMonsterData({
+                    name: randomMob.name,
+                    hp: randomMob.hp,
+                    atk: randomMob.atk,
+                    img: randomMob.img
+                });
+                document.getElementById('battleLog').innerText = `⚔️ 野生的 ${randomMob.name} 撲過來了！`;
+            } else if (encounterType === "BOSS") {
+                // 讀取關卡 Boss 設定
+                let currentConfig = levelConfigs[currentLevel];
+                setMonsterData({
+                    name: currentConfig.monsterName,
+                    hp: currentConfig.monsterHp,
+                    atk: currentConfig.monsterAtk,
+                    img: currentConfig.monsterImg
+                });
+                document.getElementById('battleLog').innerText = `⚔️ 最終決戰！${currentConfig.monsterName} 出現了！`;
+            }
             
             showActionMenu();
         }
 
     } else if (gameState === "BATTLE") {
-        // 👇 動態計算角色位置 (適應不同手機螢幕)
-        player.x = canvas.width * 0.1;  // 主角企左邊 10% 位置
-        player.y = canvas.height * 0.75; // 主角企中下方
+        player.x = canvas.width * 0.1;  
+        player.y = canvas.height * 0.75 - player.h; // 🌟 微調：減去自身高度避免超出底部
         
-        monster.x = canvas.width * 0.6; // 怪物企右邊 60% 位置
-        monster.y = canvas.height * 0.75; // 怪物企中上方 (營造考官高高在上嘅感覺)
+        monster.x = canvas.width * 0.6; 
+        monster.y = canvas.height * 0.75 - monster.h; 
 
-        // 1. 畫戰鬥背景 (自動拉闊填滿全境)
         ctx.drawImage(assets.background, 0, 0, canvas.width, canvas.height);
         
-        // 2. 畫主角同怪物
         player.draw(ctx);
         monster.draw(ctx);
         
-        // 3. 畫受傷數字
-        damageTexts.forEach((text, index) => {
+        // 🌟 關鍵修復：用 filter 清理浮動文字，唔好用 splice
+        damageTexts.forEach(text => {
             text.update();
             text.draw(ctx);
-            if (text.life <= 0) damageTexts.splice(index, 1);
         });
+        damageTexts = damageTexts.filter(text => text.life > 0);
+        
+    } else if (gameState === "END") {
+        // 🌟 關鍵修復：爆機畫面
+        ctx.fillStyle = "#1a1a2e";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#4ecca3";
+        ctx.font = "bold 24px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("🎉 恭喜通關！", canvas.width / 2, canvas.height / 2 - 20);
+        ctx.fillStyle = "white";
+        ctx.font = "18px Arial";
+        ctx.fillText("你是真正的 DSE 數學大師！", canvas.width / 2, canvas.height / 2 + 20);
     }
     
     requestAnimationFrame(gameLoop);
