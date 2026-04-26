@@ -136,7 +136,8 @@ const assets = {
     playerDead: new Image(),    monsterDead: new Image(),
     // 新增：3隻怪獸 + 1隻Boss
     monster1: new Image(), monster2: new Image(), monster3: new Image(),
-    boss: new Image()    
+    boss: new Image(),
+    toround2: new Image() // ⬅️ 新增：傳去第2關的市圖片
 };
 
 let loadedCount = 0;
@@ -144,7 +145,8 @@ const allImages = [
     assets.background, assets.player, 
     assets.tileGround, assets.tileWall, assets.tileGrass,
     assets.playerDead, assets.monsterDead,
-    assets.monster1, assets.monster2, assets.monster3, assets.boss
+    assets.monster1, assets.monster2, assets.monster3, assets.boss,
+    assets.toround2
 ];
 
 // 先設定 onload 同 onerror 監聽器
@@ -175,7 +177,8 @@ assets.monster1.src = './img/ff/monster1.png';
 assets.monster2.src = './img/ff/monster2.png';
 assets.monster3.src = './img/ff/monster3.png';
 assets.boss.src = './img/ff/boss1.png';
-
+assets.toround2.src = './img/ff/toround2.png';
+    
 let damageTexts = [];
 let playerName = "";
 let score = 0;
@@ -594,11 +597,11 @@ function drawMap() {
             } else if (tile === 2) {
                 ctx.drawImage(assets.tileGrass, x, y, TILE_SIZE, TILE_SIZE);
             } else if (tile === 4) {
-                ctx.drawImage(assets.boss, x, y, TILE_SIZE, TILE_SIZE); // 畫 Boss 喺地圖上
+                ctx.drawImage(assets.toround2, x, y, TILE_SIZE, TILE_SIZE); // 畫 Boss 喺地圖上
             }
             
-            ctx.strokeStyle = "rgba(0,0,0,0.1)";
-            ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+         //   ctx.strokeStyle = "rgba(0,0,0,0.1)";
+         //   ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
         }
     }
 }
@@ -616,7 +619,7 @@ function movePlayer(dx, dy) {
     let currentTile = mapData[nextY][nextX];
 
     if (currentTile === 4) {
-        document.getElementById('battleLog').innerText = "💀 遇見最終 BOSS！";
+        document.getElementById('battleLog').innerText = "💀 遇見第一關 BOSS！";
         player.lastTrapPos = {x: nextX, y: nextY}; 
         encounterType = "BOSS";
         startEncounterEffect();
