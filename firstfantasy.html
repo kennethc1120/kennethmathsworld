@@ -121,7 +121,7 @@
 <body>
 
 <div id="start-screen">
-    <h1 style="color:var(--accent)">數學First Fantasy4c</h1>
+    <h1 style="color:var(--accent)">數學First Fantasy4d</h1>
     <input type="text" id="playerNameInput" placeholder="輸入玩家姓名..." maxlength="10">
     <button id="startBtn" onclick="startGame()" disabled>素材載入中...</button>
 </div>
@@ -217,7 +217,7 @@ const mapLevel2 = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 // 宣告一個全域變數，紀錄目前玩緊邊張圖 (預設係第一關)
-let currentcurrentMapData = mapLevel1;
+let currentMapData = mapLevel1;
 const TILE_SIZE = 40; // 每個格子的大小（像素）
     
 // 🌟 第三步：最後先設定 levelConfigs (呢度先可以安全地用 assets 同 mapLevelX)
@@ -697,7 +697,7 @@ function winBattle() {
             return; // 爆機停止執行
         }
         // 🌟 關鍵修復：過關後，載入新地圖，重置主角位置！
-        currentcurrentMapData = levelConfigs[currentLevel].mapGrid;
+        currentMapData = levelConfigs[currentLevel].mapGrid;
         player.mapX = levelConfigs[currentLevel].startX;
         player.mapY = levelConfigs[currentLevel].startY;      
         alert(`即將進入第 ${currentLevel} 關：${levelConfigs[currentLevel].name}`);
