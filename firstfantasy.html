@@ -217,7 +217,7 @@ const mapLevel2 = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 // 宣告一個全域變數，紀錄目前玩緊邊張圖 (預設係第一關)
-let currentMapData = mapLevel1;
+let currentcurrentMapData = mapLevel1;
 const TILE_SIZE = 40; // 每個格子的大小（像素）
     
 // 🌟 第三步：最後先設定 levelConfigs (呢度先可以安全地用 assets 同 mapLevelX)
@@ -502,8 +502,8 @@ function updateCamera() {
     let targetY = (player.mapY * TILE_SIZE) - (canvas.height / 2) + (TILE_SIZE / 2);
 
     // 限制相機不要超出地圖邊界
-    let maxCamX = (mapData[0].length * TILE_SIZE) - canvas.width;
-    let maxCamY = (mapData.length * TILE_SIZE) - canvas.height;
+    let maxCamX = (currentMapData[0].length * TILE_SIZE) - canvas.width;
+    let maxCamY = (currentMapData.length * TILE_SIZE) - canvas.height;
 
     camX = Math.max(0, Math.min(targetX, maxCamX));
     camY = Math.max(0, Math.min(targetY, maxCamY));
@@ -680,7 +680,7 @@ function winBattle() {
     document.getElementById('battleLog').style.color = "#4ecca3";
 
     if (player.lastTrapPos) {
-        mapData[player.lastTrapPos.y][player.lastTrapPos.x] = 0;
+        currentMapData[player.lastTrapPos.y][player.lastTrapPos.x] = 0;
         player.lastTrapPos = null; 
     }
 
@@ -697,7 +697,7 @@ function winBattle() {
             return; // 爆機停止執行
         }
         // 🌟 關鍵修復：過關後，載入新地圖，重置主角位置！
-        currentMapData = levelConfigs[currentLevel].mapGrid;
+        currentcurrentMapData = levelConfigs[currentLevel].mapGrid;
         player.mapX = levelConfigs[currentLevel].startX;
         player.mapY = levelConfigs[currentLevel].startY;      
         alert(`即將進入第 ${currentLevel} 關：${levelConfigs[currentLevel].name}`);
@@ -767,9 +767,9 @@ function drawMap() {
     let gImg = currentConfig.groundImg || assets.tileGround;
     let wImg = currentConfig.wallImg || assets.tileWall;
     
-    for (let row = 0; row < mapData.length; row++) {
-        for (let col = 0; col < mapData[row].length; col++) {
-            let tile = mapData[row][col];
+    for (let row = 0; row < currentMapData.length; row++) {
+        for (let col = 0; col < currentMapData[row].length; col++) {
+            let tile = currentMapData[row][col];
             // 關鍵修改：繪圖座標要減去相機座標
             let x = col * TILE_SIZE - camX;
             let y = row * TILE_SIZE - camY;
@@ -793,12 +793,12 @@ function movePlayer(dx, dy) {
     let nextX = player.mapX + dx;
     let nextY = player.mapY + dy;
 
-    if (mapData[nextY][nextX] === 1) return; // 撞牆
+    if (currentMapData[nextY][nextX] === 1) return; // 撞牆
 
     player.mapX = nextX;
     player.mapY = nextY;
 
-    let currentTile = mapData[nextY][nextX];
+    let currentTile = currentMapData[nextY][nextX];
 
     if (currentTile === 4) {
         document.getElementById('battleLog').innerText = "💀 遇見第一關 BOSS！";
