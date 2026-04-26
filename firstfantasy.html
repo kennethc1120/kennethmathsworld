@@ -379,9 +379,19 @@ draw(ctx) {
 // --- [3] 遊戲邏輯 ---
 const canvas = document.getElementById('battleCanvas');
 const ctx = canvas.getContext('2d');
-const player = new Character("勇者", 100, 40, 80, 140, assets.player, 80, 80, true);
-const monster = new Character("DSE 考官", 150, 25, 420, 120, assets.monster1, 100, 100, false);
+// 勇者可以保持不變，但建議用 let，方便日後升級加 HP
+let player = new Character("勇者", 100, 40, 80, 140, assets.player, 80, 80, true);
 
+// 🌟 怪物變成「動態生成」，根據 currentLevel 讀取資料
+let monster = new Character(
+    levelConfigs[currentLevel].monsterName, // 動態名字
+    levelConfigs[currentLevel].monsterHp,   // 動態 HP
+    levelConfigs[currentLevel].monsterAtk,  // 動態攻擊力
+    420, 120,                               // 初始 X, Y 坐標 (入戰鬥時會被上面寫嘅百分比覆蓋)
+    levelConfigs[currentLevel].monsterImg,  // 動態圖片
+    100, 100,                               // 闊度, 高度
+    false                                   // 是否玩家
+);
 function startGame() {
     playerName = document.getElementById('playerNameInput').value.trim();
     if (!playerName) { alert("請輸入姓名！"); return; }
