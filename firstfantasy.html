@@ -350,7 +350,6 @@ draw(ctx) {
     ctx.fillText(this.name, rx + this.w / 2, this.y - 25); 
     
     ctx.restore();
-}
 // --- 新增：在地圖上畫出角色 ---
 // 主角的 drawOnMap 也要改
     Character.prototype.drawOnMap = function(ctx) {
@@ -358,6 +357,7 @@ draw(ctx) {
         let py = this.mapY * TILE_SIZE - camY;
         ctx.drawImage(this.img, px, py, TILE_SIZE, TILE_SIZE);
     } 
+}
 }
 
 // --- [3] 遊戲邏輯 ---
