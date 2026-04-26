@@ -788,10 +788,10 @@ function gameLoop() {
     } else if (gameState === "BATTLE") {
         // 👇 動態計算角色位置 (適應不同手機螢幕)
         player.x = canvas.width * 0.1;  // 主角企左邊 10% 位置
-        player.y = canvas.height * 0.4; // 主角企中下方
+        player.y = canvas.height * 0.75; // 主角企中下方
         
         monster.x = canvas.width * 0.6; // 怪物企右邊 60% 位置
-        monster.y = canvas.height * 0.15; // 怪物企中上方 (營造考官高高在上嘅感覺)
+        monster.y = canvas.height * 0.75; // 怪物企中上方 (營造考官高高在上嘅感覺)
 
         // 1. 畫戰鬥背景 (自動拉闊填滿全境)
         ctx.drawImage(assets.background, 0, 0, canvas.width, canvas.height);
