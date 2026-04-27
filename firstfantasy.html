@@ -122,25 +122,7 @@
             color: #1a1a2e;
             transform: scale(0.95); /* 按下時稍微縮細，增加手感 */
         }
-        /* 右手技能掣排版 (Bonus 手遊 Layout) */
-        #action-container {
-            position: fixed;
-            bottom: 40px;      /* 🌟 同左邊方向掣保持一樣高度 */
-            right: 20px;       /* 🌟 鎖死喺右下角 */
-            z-index: 1000;
-            display: flex;
-            flex-direction: column; /* 將啲掣上下排列 */
-            gap: 15px;         /* 掣同掣之間留少少空隙，防止玩家撳錯 */
-            align-items: flex-end;  /* 啲掣靠右邊貼齊 */
-        }
-        
-        /* 稍微加大啲技能掣，方便手機撳 */
-        #action-container button {
-            padding: 15px 20px;
-            font-size: 16px;
-            border-radius: 50px; /* 圓角掣會更有手遊 feel */
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); /* 加少少陰影 */
-        }
+
 
     </style>
 </head>
@@ -163,11 +145,6 @@
                 <button class="dpad-btn" onclick="movePlayer(0, 1)">▼</button>
                 <button class="dpad-btn" onclick="movePlayer(1, 0)">▶</button>
             </div>
-        </div>
-        <div id="action-container">
-            <button class="opt-btn" onclick="attack()">⚔️ 普通攻擊</button>
-            <button class="opt-btn" id="ult-btn" onclick="triggerUltimate('attack')">🔥 必殺攻擊</button>
-            <button class="opt-btn" onclick="triggerUltimate('heal')">✨ 必殺回復</button>
         </div>
     <div id="action-menu" style="display: block;">
         <div style="text-align: center; margin-bottom: 10px; color: #4ecca3; font-weight: bold;">選擇行動：</div>
