@@ -918,7 +918,7 @@ function gameLoop() {
         player.y = canvas.height * 0.7 - player.h; // 🌟 微調：減去自身高度避免超出底部
         
         monster.x = canvas.width * 0.6; 
-        monster.y = canvas.height * 0.5 - monster.h; 
+        monster.y = canvas.height * 0.6 - monster.h; 
 
         // 🌟 關鍵修復：畫目前關卡專屬嘅戰鬥背景
         let bg = levelConfigs[currentLevel].bgImg || assets.background;
