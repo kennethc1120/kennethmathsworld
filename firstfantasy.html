@@ -129,7 +129,15 @@
 <body>
 
 <div id="start-screen">
-    <h1 style="color:var(--accent)">數學First Fantasy4d</h1>
+    <h1 style="color:var(--accent)">數學First Fantasy</h1>
+    
+    <div id="leaderboard" style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; margin-bottom: 20px; min-width: 250px; text-align: left;">
+        <h3 style="color: gold; text-align: center; margin-top: 0;">🏆 勇士龍虎榜 Top 10</h3>
+        <ol id="leaderboard-list" style="color: white; padding-left: 20px; font-size: 14px;">
+            <li>資料載入中...</li>
+        </ol>
+    </div>
+
     <input type="text" id="playerNameInput" placeholder="輸入玩家姓名..." maxlength="10">
     <button id="startBtn" onclick="startGame()" disabled>素材載入中...</button>
 </div>
@@ -336,7 +344,13 @@ let gameState = "MAP"; // 初始狀態是地圖探索
 let transitionTimer = 0; // 用嚟計時閃爍咗幾耐
 let isForcedBattle = false; // 紀錄係咪踩中機關
 let encounterType = "NONE"; // 紀錄遇敵類型："RANDOM"(隨機), "TRAP"(機關), "BOSS"(王)
+let score = 0;
+let startTime = 0; // 記錄遊戲開始時間
 
+// 🌟 將這個換成你剛才部署出來的 Web App URL
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxz-lYcExIyf8NomxvYRqAoYehNyKHh_xVvINJRk6hiOFz3Z4dl_HZgxcuV4abjh6LvpQ/exec";
+
+    
 // --- 新增：怪物資料庫 ---
 const regularMonsters = [
     { name: "DSE 數學小兵", hp: 100, atk: 15, img: assets.monster1 },
@@ -486,9 +500,41 @@ let monster = new Character(
     100, 100,                               // 闊度, 高度
     false                                   // 是否玩家
 );
+    
+// 遊戲啟動時載入龍虎榜
+window.onload = function() {
+    fetchLeaderboard();
+};
+
+function fetchLeaderboard() {
+    fetch(GAS_URL)
+        .then(response => response.json())
+        .then(data => {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = "";
+            if (data.length === 0) {
+                list.innerHTML = "<li>暫時未有勇士登榜！</li>";
+                return;
+            }
+            data.forEach((row, index) => {
+                // row[0] 是名字, row[1] 是分數
+                list.innerHTML += `<li style="margin-bottom: 5px;">${row[0]} - <span style="color:var(--accent); font-weight:bold;">${row[1]} 分</span></li>`;
+            });
+        })
+        .catch(err => {
+            document.getElementById('leaderboard-list').innerHTML = "<li>無法連接龍虎榜伺服器</li>";
+        });
+}
+
+
+    
 function startGame() {
     playerName = document.getElementById('playerNameInput').value.trim();
     if (!playerName) { alert("請輸入姓名！"); return; }
+    
+    startTime = Date.now(); // 記錄開始時間
+    score = 0; // 重置分數
+    
     document.getElementById('start-screen').style.display = 'none';
     
     // 初始化設定為地圖模式
@@ -760,7 +806,7 @@ function finishGame(msg) {
 }
 
 function uploadData() {
-    const URL = "https://script.google.com/macros/s/AKfycbzUVYuECt3TAy2eOceIKD3F1VCB9xtqhqh8Bqo3r0HJxwGdr6fbTuMXaXn4mxGhRIyv-g/exec"; 
+    const URL = "https://script.google.com/macros/s/AKfycbxz-lYcExIyf8NomxvYRqAoYehNyKHh_xVvINJRk6hiOFz3Z4dl_HZgxcuV4abjh6LvpQ/exec"; 
     const data = { name: playerName, score: score, date: new Date().toLocaleString() };
     if (URL.includes("你的_GOOGLE")) {
         alert(`遊戲結束！玩家：${playerName}, 分數：${score}`);
@@ -867,7 +913,33 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') movePlayer(-1, 0);
     if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') movePlayer(1, 0);
 });    
+    
+// 上傳分數的函數（在爆機或死亡時呼叫）
+function submitScore(finalLevel) {
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000); // 總秒數
+    const hpBonus = player.hp * 10;
+    
+    // 結算總分 (答題加減分可以在 checkAnswer 裡面做)
+    score += (finalLevel * 2000) + hpBonus - timeSpent;
+    if (score < 0) score = 0;
+    
+    alert(`結算完成！你的總分是：${score} 分！正在上傳成績...`);
 
+    const data = {
+        name: playerName,
+        score: score,
+        level: finalLevel
+    };
+
+    fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify(data) // Google Apps Script 收 JSON
+    }).then(() => {
+        alert("成績已成功上傳！");
+    }).catch(err => {
+        alert("上傳失敗，請檢查網路連線。");
+    });
+}
 
     
 function gameLoop() {
