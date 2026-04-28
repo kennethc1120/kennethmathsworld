@@ -749,7 +749,10 @@ function winBattle() {
     isBusy = true;
     document.getElementById('battleLog').innerText = "✌️ 戰鬥勝利！";
     document.getElementById('battleLog').style.color = "#4ecca3";
-
+    
+    // 🌟 新增：重設畫布濾鏡，將顏色變返原狀
+    document.getElementById('battleCanvas').style.filter = "none";
+    
     if (player.lastTrapPos) {
         currentMapData[player.lastTrapPos.y][player.lastTrapPos.x] = 0;
         player.lastTrapPos = null; 
