@@ -520,8 +520,7 @@ let monster = new Character(
     100, 100,                               // 闊度, 高度
     false                                   // 是否玩家
 );
-### 2. JavaScript 加入位置
-你需要將 `toggleMute` 函數加入到你的 `<script>` 標籤內，建議放在全域變數宣告的附近（例如 `let gameState` 下面）：
+
 
 ```javascript
 let isMuted = false;
@@ -576,22 +575,14 @@ function startGame() {
     
     document.getElementById('start-screen').style.display = 'none';
     
-    // 🌟 新增：開始播放地圖背景音樂
-    sounds.mapBgm.play().catch(e => console.log("需點擊頁面後才能播放音樂"));
-     // 🌟 優化後的播放邏輯
-    sounds.mapBgm.volume = 0.5; // 設定音量為 50%，避免太大聲
-    const playPromise = sounds.mapBgm.play();
-
-    if (playPromise !== undefined) {
-        playPromise.then(_ => {
-            console.log("背景音樂成功播放");
-        }).catch(error => {
-            // 這裡會抓到為何不能播放的原因
-            console.log("自動播放被攔截，原因: ", error);
-            // 嘗試引導用戶再次點擊
-            document.getElementById('battleLog').innerText = "提示：請點擊畫面以開啟聲音。";
-        });
-    }
+// 🌟 修正後的播放邏輯：只留這一段
+    sounds.mapBgm.volume = 0.5; 
+    sounds.mapBgm.play().then(() => {
+        console.log("背景音樂播放成功");
+    }).catch(error => {
+        console.log("播放失敗，原因：", error);
+        document.getElementById('battleLog').innerText = "提示：請確保音效檔案路徑正確。";
+    });
     
     // 初始化設定為地圖模式
     gameState = "MAP"; 
