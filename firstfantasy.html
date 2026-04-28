@@ -559,6 +559,20 @@ function startGame() {
     
     // 🌟 新增：開始播放地圖背景音樂
     sounds.mapBgm.play().catch(e => console.log("需點擊頁面後才能播放音樂"));
+     // 🌟 優化後的播放邏輯
+    sounds.mapBgm.volume = 0.5; // 設定音量為 50%，避免太大聲
+    const playPromise = sounds.mapBgm.play();
+
+    if (playPromise !== undefined) {
+        playPromise.then(_ => {
+            console.log("背景音樂成功播放");
+        }).catch(error => {
+            // 這裡會抓到為何不能播放的原因
+            console.log("自動播放被攔截，原因: ", error);
+            // 嘗試引導用戶再次點擊
+            document.getElementById('battleLog').innerText = "提示：請點擊畫面以開啟聲音。";
+        });
+    }
     
     // 初始化設定為地圖模式
     gameState = "MAP"; 
