@@ -200,6 +200,23 @@ const assets = {
     boss2: new Image(),
     toround3: new Image() 
 };
+
+// 🌟 在 assets 之後加入音效物件
+const sounds = {
+    correct: new Audio('./sfx/ff/correct.mp3'),  // 答對音效
+    wrong: new Audio('./sfx/ff/wrong.mp3'),      // 答錯音效
+    attack: new Audio('./sfx/ff/attack.mp3'),    // 攻擊音效
+    heal: new Audio('./sfx/ff/heal.mp3'),        // 回復音效
+    mapBgm: new Audio('./bgm/ff/map.mp3'),       // 地圖音樂
+    battleBgm: new Audio('./bgm/ff/battle.mp3')  // 戰鬥音樂
+};
+
+// 設定音樂循環播放
+sounds.mapBgm.loop = true;
+sounds.battleBgm.loop = true;
+
+
+    
 // 🌟 第二步：畫好所有關卡嘅地圖 (必須喺 levelConfigs 之前！) (0=平地, 1=牆壁, 2=草叢, 3=機關, 4=Boss)
 const mapLevel1 = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -540,6 +557,9 @@ function startGame() {
     
     document.getElementById('start-screen').style.display = 'none';
     
+    // 🌟 新增：開始播放地圖背景音樂
+    sounds.mapBgm.play().catch(e => console.log("需點擊頁面後才能播放音樂"));
+    
     // 初始化設定為地圖模式
     gameState = "MAP"; 
     
@@ -672,8 +692,14 @@ function checkAnswer(choice) {
     btns.forEach(b => b.disabled = true);
 
     if (choice === currentQ.ans) {
+        // 🌟 播放答對音效
+        sounds.correct.currentTime = 0;
+        sounds.correct.play();
+        
         if (currentAction === 'ult') {
             // 原本的必殺攻擊
+            sounds.attack.play(); // 必殺攻擊聲
+            
             let dmg = player.atk * 3;
             player.sp = 0;
             monster.takeDamage(dmg);
@@ -681,6 +707,8 @@ function checkAnswer(choice) {
             document.getElementById('battleLog').style.color = "#9b59b6";
         } 
         else if (currentAction === 'heal') {
+            sounds.heal.play();   // 回復聲
+            
             // 新增：必殺回復
             let healAmount = Math.floor(player.maxHp * 0.7); // 回復 70% HP
             player.hp = Math.min(player.maxHp, player.hp + healAmount);
@@ -692,6 +720,8 @@ function checkAnswer(choice) {
         } 
         else {
             // 普攻
+            sounds.attack.play(); // 普通攻擊聲
+            
             player.sp = Math.min(100, player.sp + 25);
             monster.takeDamage(player.atk);
             document.getElementById('battleLog').innerText = "✅ 正確！發動精準打擊！";
@@ -703,6 +733,10 @@ function checkAnswer(choice) {
 
     } else {
         // 答錯咗
+        // 🌟 播放答錯音效
+        sounds.wrong.currentTime = 0;
+        sounds.wrong.play();
+        
         document.getElementById('battleLog').innerText = "❌ 算錯了！招式被斷，考官趁機反擊！";
         document.getElementById('battleLog').style.color = "#ff4d4d";
         if (currentAction === 'ult' || currentAction === 'heal') {
@@ -781,7 +815,10 @@ function winBattle() {
         // 如果只係普通小怪或機關
         alert(`成功擊退了 ${monster.name}！獲得經驗！`);
     }
-
+    // 🌟 新增：戰鬥音樂停止，轉回地圖音樂
+    sounds.battleBgm.pause();
+    sounds.battleBgm.currentTime = 0;
+    
     // 延遲 1.5 秒後返回地圖
     setTimeout(() => {
         gameState = "MAP";
@@ -989,6 +1026,11 @@ function gameLoop() {
         // 閃咗大約 1.5 秒之後，正式進入戰鬥
         if (transitionTimer > 90) {
             gameState = "BATTLE";
+            // 🌟 新增：切換音樂
+            sounds.mapBgm.pause();
+            sounds.mapBgm.currentTime = 0;
+            sounds.battleBgm.play();
+            
              let currentConfig = levelConfigs[currentLevel]; // 攞目前關卡資料          
             
             // 🌟 關鍵修復：區分遇敵類型
