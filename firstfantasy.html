@@ -127,7 +127,7 @@
     </style>
 </head>
 <body>
-
+<button id="mute-btn" onclick="toggleMute()" style="position:fixed; top:10px; right:10px; z-index:1001;">🔊</button>
 <div id="start-screen">
     <h1 style="color:var(--accent)">數學First Fantasy</h1>
     
@@ -520,7 +520,26 @@ let monster = new Character(
     100, 100,                               // 闊度, 高度
     false                                   // 是否玩家
 );
+### 2. JavaScript 加入位置
+你需要將 `toggleMute` 函數加入到你的 `<script>` 標籤內，建議放在全域變數宣告的附近（例如 `let gameState` 下面）：
+
+```javascript
+let isMuted = false;
+
+function toggleMute() {
+    isMuted = !isMuted;
     
+    // 遍歷 sounds 物件裡面所有音訊，設定靜音
+    for (let key in sounds) {
+        if (sounds[key] instanceof Audio) {
+            sounds[key].muted = isMuted;
+        }
+    }
+    
+    // 更新按鈕圖示
+    document.getElementById('mute-btn').innerText = isMuted ? "🔇" : "🔊";
+}
+
 // 遊戲啟動時載入龍虎榜
 window.onload = function() {
     fetchLeaderboard();
