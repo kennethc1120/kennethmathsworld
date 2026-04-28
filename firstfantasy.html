@@ -718,7 +718,11 @@ function enemyTurn() {
     document.getElementById('battleLog').style.color = "#ff4d4d";
     
      if (player.hp <= 0) {
-        document.getElementById('battleLog').innerText = "💀 你戰敗了... 勇者請重新來過。";
+         player.hp = 0;
+        document.getElementById('battleLog').innerText = "💀 勇者倒下了... Game Over！";
+    
+        // 🌟 喺度加入上傳分數！(傳入目前關卡)
+        submitScore(currentLevel);
         setTimeout(() => {
         location.reload(); // 最簡單的做法：重新整理網頁
       }, 2000);
@@ -749,6 +753,8 @@ function winBattle() {
         if (currentLevel > 6) {
             alert("🎉 恭喜你！你已經通關所有 DSE 數學挑戰！");
             gameState = "END";
+            // 🌟 爆機啦！喺度加入上傳分數！
+            submitScore(currentLevel);
             return; // 爆機停止執行
         }
         // 🌟 關鍵修復：過關後，載入新地圖，重置主角位置！
