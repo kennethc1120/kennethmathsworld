@@ -935,10 +935,12 @@ function uploadData() {
     
 function drawMap() {
     updateCamera(); // 畫地圖前先更新相機位置
+    
     // 攞目前關卡專用嘅圖案
     let currentConfig = levelConfigs[currentLevel];
     let gImg = currentConfig.groundImg || assets.tileGround;
     let wImg = currentConfig.wallImg || assets.tileWall;
+    let grassImg = currentConfig.grassImg || assets.tileGrass; // 🌿 加入草地的動態變數
     
     for (let row = 0; row < currentMapData.length; row++) {
         for (let col = 0; col < currentMapData[row].length; col++) {
@@ -950,11 +952,13 @@ function drawMap() {
             // 優化：只畫出在畫面內的格子 (節省效能)
             if (x + TILE_SIZE < 0 || x > canvas.width || y + TILE_SIZE < 0 || y > canvas.height) continue;
 
-            ctx.drawImage(assets.tileGround, x, y, TILE_SIZE, TILE_SIZE);
-            if (tile === 1) ctx.drawImage(assets.tileWall, x, y, TILE_SIZE, TILE_SIZE);
-            else if (tile === 2) ctx.drawImage(assets.tileGrass, x, y, TILE_SIZE, TILE_SIZE);
-            else if (tile === 3) ctx.drawImage(assets.tileGrass, x, y, TILE_SIZE, TILE_SIZE);
-            else if (tile === 4) ctx.drawImage(assets.toround2, x, y, TILE_SIZE, TILE_SIZE);
+            // ✨ 將這裡的 assets 換成動態變數 (gImg, wImg, grassImg)
+            ctx.drawImage(gImg, x, y, TILE_SIZE, TILE_SIZE);
+            
+            if (tile === 1) ctx.drawImage(wImg, x, y, TILE_SIZE, TILE_SIZE);
+            else if (tile === 2) ctx.drawImage(grassImg, x, y, TILE_SIZE, TILE_SIZE);
+            else if (tile === 3) ctx.drawImage(grassImg, x, y, TILE_SIZE, TILE_SIZE);
+            else if (tile === 4) ctx.drawImage(assets.toround2, x, y, TILE_SIZE, TILE_SIZE); // Boss 格維持不變
         }
     }
 }
