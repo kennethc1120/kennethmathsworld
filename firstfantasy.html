@@ -252,7 +252,7 @@ const mapLevel1 = [
 ]; 
 const mapLevel2 = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 2, 1, 2, 0, 2, 1, 2, 4, 2, 1],
+    [1, 0, 4, 0, 1, 0, 0, 0, 1, 2, 2, 2, 1, 2, 0, 2, 1, 2, 2, 2, 1],
     [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 3, 0, 2, 2, 2, 1],
     [1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 2, 1, 0, 0, 2, 1, 2, 2, 2, 1],
     [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
@@ -311,14 +311,14 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
         groundImg: assets.tileGround2, // 🌟 第二關新平地
         wallImg: assets.tileWall2,     // 🌟 第二關新牆壁
         grassImg: assets.tileGrass2,   // 第二關新草地
-        startX: 1, startY: 3,          // 主角第二關出世位置
+        startX: 1, startY: 1,          // 主角第二關出世位置
         // 第二關 Boss
         monsterName: "幾何石魔", monsterHp: 200, monsterAtk: 35, monsterImg: assets.boss2,
         // 第二關專屬草叢小怪 (🌟 新怪物！)
         mobs: [
             { name: "正方形兵", hp: 130, atk: 20, img: assets.monster1b },
             { name: "圓形巨石", hp: 180, atk: 18, img: assets.monster2b },
-            { name: "SSS烏龜", hp: 200, atk: 15, img: assets.monster3b }
+            { name: "SSS蛟龍", hp: 200, atk: 15, img: assets.monster3b }
         ]
     }
     // ... 可以繼續加 3, 4, 5, 6 關 ...
@@ -376,11 +376,11 @@ assets.tileGround2.src = './img/ff/ground2.png';
 assets.tileWall2.src = './img/ff/rockwall.png';     
 assets.tileGrass2.src = './img/ff/moss.png';
     // 設定新怪獸路徑
-assets.monster1b.src = './img/ff/monster1.png';
-assets.monster2b.src = './img/ff/monster2.png';
-assets.monster3b.src = './img/ff/monster3.png';
-assets.boss2.src = './img/ff/boss1.png';
-assets.toround3.src = './img/ff/toround2.png';
+assets.monster1b.src = './img/ff/monster1b.png';
+assets.monster2b.src = './img/ff/monster2b.png';
+assets.monster3b.src = './img/ff/monster3b.png';
+assets.boss2.src = './img/ff/boss2.png';
+assets.toround3.src = './img/ff/toround3.png';
 
 
     
