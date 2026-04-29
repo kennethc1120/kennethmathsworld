@@ -125,6 +125,10 @@
 
 
     </style>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
 </head>
 <body>
 <button id="mute-btn" onclick="toggleMute()" style="position:fixed; top:10px; right:10px; z-index:1001;">🔊</button>
@@ -662,6 +666,10 @@ function renderOptions() {
         btn.onclick = () => checkAnswer(idx);
         container.appendChild(btn);
     });
+    // 呼叫 MathJax 重新排版剛載入的題目和選項
+    if (window.MathJax) {
+        MathJax.typesetPromise([document.getElementById('quiz-area')]);
+    }
 }
 
 // --- 確保在腳本最上方 (全域變數區) 加上這行 ---
