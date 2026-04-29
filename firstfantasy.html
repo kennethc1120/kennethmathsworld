@@ -834,7 +834,6 @@ function enemyTurn() {
 }
 
 // 新增勝利處理函式
-// 新增勝利處理函式
 function winBattle() {
     isBusy = true;
     document.getElementById('battleLog').innerText = "✌️ 戰鬥勝利！";
@@ -857,7 +856,7 @@ function winBattle() {
         alert(`成功擊退了 ${monster.name}！獲得經驗！`);
     }
 
-    // 🌟 新增：戰鬥音樂停止，轉回地圖音樂
+    // 🌟 新增：戰鬥音樂停止
     sounds.battleBgm.pause();
     sounds.battleBgm.currentTime = 0;
     
@@ -881,6 +880,9 @@ function winBattle() {
         }
 
         gameState = "MAP";
+        
+        // 🎵 👇 關鍵修復：回到地圖時，重新播放地圖音樂！
+        sounds.mapBgm.play(); 
         
         player.hp = player.maxHp; // 過關補滿血
         isBusy = false;
