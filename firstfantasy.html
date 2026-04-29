@@ -35,12 +35,14 @@
         }
 
         /* 3. 畫布 (地圖/戰鬥畫面)：自動填滿剩餘空間，但絕不越界！ */
+        /* 修改 canvas 樣式 */
         canvas {
-            width: 100%;
-            flex: 1;          /* 自動佔據上方所有可用空間 */
-            min-height: 0;    /* 🌟 極度關鍵！防止畫布自身高度撐爆外框 */
-            object-fit: cover; 
-            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* 確保圖片不變形，多出的空間留白或顯示背景 */
+            aspect-ratio: 16 / 9; /* 強制比例，你可以根據需求改為 4/3 */
+            margin: 0 auto; /* 置中 */
+            image-rendering: pixelated; /* 如果是像素風，這行能保持銳利 */
         }
 
         /* 4. 底部控制面板 (方向鍵 / 攻擊按鈕)：鎖死高度，絕不被擠壓 */
@@ -586,6 +588,12 @@ function startGame() {
         console.log("播放失敗，原因：", error);
         document.getElementById('battleLog').innerText = "提示：請確保音效檔案路徑正確。";
     });
+// 在 startGame 裡面加入這段，解決 iOS 點擊延遲
+document.addEventListener('touchstart', function(event) {
+    if (event.touches.length > 1) {
+        event.preventDefault(); // 禁用多指縮放
+    }
+}, { passive: false });
     
     // 初始化設定為地圖模式
     gameState = "MAP"; 
@@ -1092,11 +1100,12 @@ function gameLoop() {
         }
 
     } else if (gameState === "BATTLE") {
-        player.x = canvas.width * 0.1;  
-        player.y = canvas.height * 0.72 - player.h; // 🌟 微調：減去自身高度避免超出底部
-        
-        monster.x = canvas.width * 0.6; 
-        monster.y = canvas.height * 0.65 - monster.h;
+        // 根據目前的畫布寬高動態計算位置
+            player.x = canvas.width * 0.15;  // 距離左邊 15%
+            player.y = canvas.height * 0.5;  // 垂直置中附近
+    
+            monster.x = canvas.width * 0.65; // 距離左邊 65%
+            monster.y = canvas.height * 0.45;
 
         // 🌟 關鍵修復：畫目前關卡專屬嘅戰鬥背景
         let bg = levelConfigs[currentLevel].bgImg || assets.background;
