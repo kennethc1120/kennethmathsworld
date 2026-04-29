@@ -810,6 +810,7 @@ function enemyTurn() {
 }
 
 // 新增勝利處理函式
+// 新增勝利處理函式
 function winBattle() {
     isBusy = true;
     document.getElementById('battleLog').innerText = "✌️ 戰鬥勝利！";
@@ -825,33 +826,36 @@ function winBattle() {
 
     score += 100;
     
-    // 判斷係打小怪定打 Boss
+    // 呢度淨係顯示文字提示，刪除咗原本嘅 currentLevel++ 同地圖設定
     if (encounterType === "BOSS") {
         alert(`成功擊敗 ${monster.name}！`);
-        currentLevel++;
-        
-        if (currentLevel > 6) {
-            alert("🎉 恭喜你！你已經通關所有 DSE 數學挑戰！");
-            gameState = "END";
-            // 🌟 爆機啦！喺度加入上傳分數！
-            submitScore(currentLevel);
-            return; // 爆機停止執行
-        }
-        // 🌟 關鍵修復：過關後，載入新地圖，重置主角位置！
-        currentMapData = levelConfigs[currentLevel].mapGrid;
-        player.mapX = levelConfigs[currentLevel].startX;
-        player.mapY = levelConfigs[currentLevel].startY;      
-        alert(`即將進入第 ${currentLevel} 關：${levelConfigs[currentLevel].name}`);
     } else {
-        // 如果只係普通小怪或機關
         alert(`成功擊退了 ${monster.name}！獲得經驗！`);
     }
+
     // 🌟 新增：戰鬥音樂停止，轉回地圖音樂
     sounds.battleBgm.pause();
     sounds.battleBgm.currentTime = 0;
     
     // 延遲 1.5 秒後返回地圖
     setTimeout(() => {
+        // ✅ 將 Boss 過關升級嘅邏輯搬到呢度！等 1.5 秒後先正式升級
+        if (encounterType === "BOSS") {
+            currentLevel++;
+            
+            if (currentLevel > 6) {
+                alert("🎉 恭喜你！你已經通關所有 DSE 數學挑戰！");
+                gameState = "END";
+                submitScore(currentLevel);
+                return; // 爆機停止執行
+            }
+            // 載入新地圖，重置主角位置
+            currentMapData = levelConfigs[currentLevel].mapGrid;
+            player.mapX = levelConfigs[currentLevel].startX;
+            player.mapY = levelConfigs[currentLevel].startY;      
+            alert(`即將進入第 ${currentLevel} 關：${levelConfigs[currentLevel].name}`);
+        }
+
         gameState = "MAP";
         
         player.hp = player.maxHp; // 過關補滿血
@@ -866,6 +870,7 @@ function winBattle() {
         document.getElementById('battleLog').style.color = "#aaa";
     }, 1500);
 }
+    
 // 重置怪物的函式
 function resetMonster() {
     monster.hp = monster.maxHp;
