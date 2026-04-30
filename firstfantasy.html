@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -8,7 +9,7 @@
         :root { --main-bg: #1a1a2e; --ui-panel: #16213e; --accent: #4ecca3; }
        
         /* 1. 鎖死最外層 Body，唔准佢上下滑動 */
-        body {
+/*        body {
             margin: 0;
             padding: 0;
             width: 100vw;
@@ -17,7 +18,7 @@
             background-color: #1a1e36; /* 你原本嘅深藍色背景 */
         }       
         /* 啟動遮罩 */
-        #start-screen {
+/*        #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(10, 10, 25, 0.95); display: flex; flex-direction: column; 
             justify-content: center; align-items: center; z-index: 100;
@@ -27,7 +28,7 @@
         #start-screen button:disabled { background: #555; cursor: not-allowed; }
 
         /* 2. 主容器：採用 Flex 垂直排列 */
-        #game-wrapper {
+/*        #game-wrapper {
             display: flex;
             flex-direction: column;
             width: 100%;
@@ -35,7 +36,7 @@
         }
 
         /* 3. 畫布 (地圖/戰鬥畫面)：自動填滿剩餘空間，但絕不越界！ */
-        canvas {
+/*        canvas {
             width: 100%;
             flex: 1;          /* 自動佔據上方所有可用空間 */
             min-height: 0;    /* 🌟 極度關鍵！防止畫布自身高度撐爆外框 */
@@ -44,7 +45,7 @@
         }
 
         /* 4. 底部控制面板 (方向鍵 / 攻擊按鈕)：鎖死高度，絕不被擠壓 */
-        #ui-panel { /* 假設你裝住按鈕嗰個 div 叫 ui-panel，請根據你實際嘅 ID 修改 */
+/*        #ui-panel { /* 假設你裝住按鈕嗰個 div 叫 ui-panel，請根據你實際嘅 ID 修改 */
             width: 100%;
             flex-shrink: 0;   /* 🌟 極度關鍵！就算上面畫布幾大，都唔准縮小或擠走呢個面板 */
             box-sizing: border-box;
@@ -54,7 +55,7 @@
             border-top: 1px solid rgba(255, 255, 255, 0.2);
             /* 如果內容太多要捲動，可以加 overflow-y: auto; */
         }
-        #question { font-size: 20px; color: var(--accent); min-height: 60px; text-align: center; font-weight: bold; line-height: 1.4; }
+/*        #question { font-size: 20px; color: var(--accent); min-height: 60px; text-align: center; font-weight: bold; line-height: 1.4; }
         
         .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .opt-btn { 
@@ -66,7 +67,7 @@
 
         #battleLog { font-size: 14px; color: #aaa; margin-top: 15px; text-align: center; height: 20px; }
         /* 必殺技按鈕呼吸燈效果 */
-        @keyframes glow {
+ /*       @keyframes glow {
             0% { box-shadow: 0 0 5px #9b59b6; }
             50% { box-shadow: 0 0 20px #9b59b6; }
             100% { box-shadow: 0 0 5px #9b59b6; }
@@ -84,15 +85,15 @@
         }
         
         /* 虛擬方向鍵排版與美化 */
-        #dpad-container {
+/*        #dpad-container {
             /* 🌟 新增呢 4 行：將個掣鎖死喺左下角 */
-            position: fixed;   
+/*            position: fixed;   
             bottom: 40px;      /* 距離螢幕底部 40px (可以自己改數字微調) */
             left: 20px;        /* 距離螢幕左邊 20px */
             z-index: 1000;     /* 確保佢喺最頂層，唔會畀其他嘢遮住 */
             
             /* 👇 保留你原本嘅 Flex 設定，等個十字掣繼續保持原狀 */
-            display: flex;
+/*            display: flex;
             flex-direction: column;
             align-items: center;
         }
@@ -100,7 +101,7 @@
             display: grid;
             grid-template-columns: 50px 50px 50px;
             grid-template-rows: 50px 50px; /* 兩行高 */
-            gap: 8px;
+/*            gap: 8px;
             justify-content: center;
         }
         .dpad-btn {
@@ -111,8 +112,8 @@
             font-size: 20px;
             cursor: pointer;
             user-select: none; /* 防止手機點擊時選取文字 */
-            touch-action: manipulation; /* 提升手機點擊反應速度 */
-            display: flex;
+/*            touch-action: manipulation; /* 提升手機點擊反應速度 */
+/*            display: flex;
             justify-content: center;
             align-items: center;
             transition: 0.1s;
@@ -124,14 +125,15 @@
         }
 
 
-    </style>
+/*    </style>
     
 
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
-</head>
+<!--
+    *</head>
 <body>
-<button id="mute-btn" onclick="toggleMute()" style="position:fixed; top:10px; right:10px; z-index:1001;">🔊</button>
+/*<button id="mute-btn" onclick="toggleMute()" style="position:fixed; top:10px; right:10px; z-index:1001;">🔊</button>
 <div id="start-screen">
     <h1 style="color:var(--accent)">數學First Fantasy</h1>
     
