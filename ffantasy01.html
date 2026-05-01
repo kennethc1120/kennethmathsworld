@@ -604,6 +604,7 @@ function startGame() {
     
 // 🌟 修正後的播放邏輯：只留這一段
     sounds.mapBgm.volume = 0.3; 
+    sounds.battleBgm.volume = 0.3; // 👈 新增這行！設定戰鬥音樂音量 (0.2表示20%，可依喜好微調)
     sounds.mapBgm.play().then(() => {
         console.log("背景音樂播放成功");
     }).catch(error => {
@@ -968,7 +969,12 @@ function drawMap() {
 
 function movePlayer(dx, dy) {
     if (gameState !== "MAP") return;
-
+    // 🎵 新增這段：確保地圖音樂有在播放。
+    // 如果因為換關卡的 alert 被瀏覽器強制暫停，就在玩家行第一步時立刻恢復播放！
+    if (sounds.mapBgm.paused && !isMuted) {
+        sounds.mapBgm.play().catch(e => console.log("等待互動才能播放音樂:", e));
+    }
+    
     let nextX = player.mapX + dx;
     let nextY = player.mapY + dy;
 
