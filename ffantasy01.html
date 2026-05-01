@@ -166,7 +166,7 @@
     
             <div id="ult-container" style="display: none; grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 5px;">
                 <button id="ult-atk-btn" class="opt-btn" onclick="selectAction('ult')" style="background: #9b59b6; border-color: #d1a3e0;">🔥 極限運算</button>
-                <button id="ult-heal-btn" class="opt-btn" onclick="selectAction('heal')" style="background: #27ae60; border-color: #2ecc71;">💖 數之治癒</button>
+                <button id="ult-heal-btn" class="opt-btn" onclick="selectAction('heal')" style="background: #27ae60; border-color: #2ecc71;">💖 無限治癒</button>
             </div>
         </div>
     </div>
@@ -357,11 +357,11 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
         mobs: [
             { name: "正方形兵", hp: 130, atk: 20, img: assets.monster1b },
             { name: "圓形巨石", hp: 180, atk: 18, img: assets.monster2b },
-            { name: "SSS蛟龍", hp: 200, atk: 15, img: assets.monster3b }
+            { name: "SAS蛟龍", hp: 200, atk: 15, img: assets.monster3b }
         ]
     },
     3: { 
-        name: "幾何遺跡", 
+        name: "XY海島", 
         mapGrid: mapLevel3,            // 第三關用地圖 2
         bgImg: assets.background3,        // 🌟 第三關新戰鬥背景
         groundImg: assets.tileGround3, // 🌟 第三關新平地
@@ -373,9 +373,9 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
         monsterName: "坐標海盜王", monsterHp: 240, monsterAtk: 45, monsterImg: assets.boss3,
         // 第三關專屬草叢小怪 (🌟 新怪物！)
         mobs: [
-            { name: "正方形兵", hp: 180, atk: 25, img: assets.monster1c },
-            { name: "圓形巨石", hp: 200, atk: 22, img: assets.monster2c },
-            { name: "SSS蛟龍", hp: 240, atk: 20, img: assets.monster3c }
+            { name: "原點怪", hp: 180, atk: 25, img: assets.monster1c },
+            { name: "軌跡神獸", hp: 200, atk: 22, img: assets.monster2c },
+            { name: "平行猿猴", hp: 240, atk: 20, img: assets.monster3c }
         ]
     }
     // ... 可以繼續加 3, 4, 5, 6 關 ...
