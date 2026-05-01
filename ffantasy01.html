@@ -294,6 +294,7 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
         groundImg: assets.tileGround, // 第一關平地
         wallImg: assets.tileWall,     // 第一關牆壁        
         grassImg: assets.tileGrass,   // 第一關草地
+        mapBossImg: assets.toround2,  // 👈 🌟 新增這行：第一關的地圖 Boss 圖案
         startX: 1, startY: 1,         // 主角第一關出世位置
         // 第一關 Boss
         monsterName: "代數小王子", monsterHp: 150, monsterAtk: 25, monsterImg: assets.boss,
@@ -311,6 +312,7 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
         groundImg: assets.tileGround2, // 🌟 第二關新平地
         wallImg: assets.tileWall2,     // 🌟 第二關新牆壁
         grassImg: assets.tileGrass2,   // 第二關新草地
+        mapBossImg: assets.toround3,   // 👈 🌟 新增這行：第二關的地圖 Boss 圖案
         startX: 1, startY: 1,          // 主角第二關出世位置
         // 第二關 Boss
         monsterName: "幾何石魔", monsterHp: 200, monsterAtk: 35, monsterImg: assets.boss2,
@@ -943,25 +945,23 @@ function drawMap() {
     let currentConfig = levelConfigs[currentLevel];
     let gImg = currentConfig.groundImg || assets.tileGround;
     let wImg = currentConfig.wallImg || assets.tileWall;
-    let grassImg = currentConfig.grassImg || assets.tileGrass; // 🌿 加入草地的動態變數
+    let grassImg = currentConfig.grassImg || assets.tileGrass; 
+    let bossMapImg = currentConfig.mapBossImg || assets.toround2; // 👈 🌟 新增這行：動態讀取 Boss 圖案
     
     for (let row = 0; row < currentMapData.length; row++) {
         for (let col = 0; col < currentMapData[row].length; col++) {
             let tile = currentMapData[row][col];
-            // 關鍵修改：繪圖座標要減去相機座標
             let x = col * TILE_SIZE - camX;
             let y = row * TILE_SIZE - camY;
 
-            // 優化：只畫出在畫面內的格子 (節省效能)
             if (x + TILE_SIZE < 0 || x > canvas.width || y + TILE_SIZE < 0 || y > canvas.height) continue;
 
-            // ✨ 將這裡的 assets 換成動態變數 (gImg, wImg, grassImg)
             ctx.drawImage(gImg, x, y, TILE_SIZE, TILE_SIZE);
             
             if (tile === 1) ctx.drawImage(wImg, x, y, TILE_SIZE, TILE_SIZE);
             else if (tile === 2) ctx.drawImage(grassImg, x, y, TILE_SIZE, TILE_SIZE);
             else if (tile === 3) ctx.drawImage(grassImg, x, y, TILE_SIZE, TILE_SIZE);
-            else if (tile === 4) ctx.drawImage(assets.toround2, x, y, TILE_SIZE, TILE_SIZE); // Boss 格維持不變
+            else if (tile === 4) ctx.drawImage(bossMapImg, x, y, TILE_SIZE, TILE_SIZE); // 👈 🌟 關鍵修改：將 assets.toround2 改為 bossMapImg
         }
     }
 }
