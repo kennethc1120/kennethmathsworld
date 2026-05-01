@@ -202,7 +202,14 @@ const assets = {
     tileGround2: new Image(), tileWall2: new Image(), tileGrass2: new Image(),
     monster1b: new Image(), monster2b: new Image(), monster3b: new Image(),
     boss2: new Image(),
-    toround3: new Image() 
+    toround3: new Image(), 
+
+    // 👇 第 3 關素材 
+    background3: new Image(),
+    tileGround3: new Image(), tileWall3: new Image(), tileGrass3: new Image(),
+    monster1c: new Image(), monster2c: new Image(), monster3c: new Image(),
+    boss3: new Image(),
+    toround4: new Image() 
 };
 
 // 🌟 在 assets 之後加入音效物件
@@ -281,6 +288,37 @@ const mapLevel2 = [
     [1, 2, 2, 2, 1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 2, 1, 2, 0, 2, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
+const mapLevel3 = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 4, 0, 1, 0, 0, 0, 1, 0, 2, 0, 1, 3, 0, 2, 1, 2, 4, 2, 1],
+    [1, 0, 0, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 3, 0, 2, 2, 2, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 2, 1, 0, 0, 2, 1, 2, 2, 2, 1],
+    [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 2, 1, 2, 0, 0, 1, 0, 0, 0, 1, 2, 0, 2, 1, 2, 2, 2, 1],
+    [1, 0, 0, 3, 2, 2, 3, 0, 1, 0, 0, 2, 0, 0, 0, 0, 1, 2, 3, 2, 1],
+    [1, 2, 2, 2, 1, 2, 2, 2, 1, 0, 2, 0, 1, 2, 0, 2, 1, 2, 3, 2, 1],
+    [1, 1, 0, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
+    [1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 0, 2, 1, 3, 2, 3, 1],
+    [1, 2, 3, 2, 1, 2, 0, 3, 0, 2, 0, 2, 1, 0, 0, 0, 1, 2, 3, 2, 1],
+    [1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 3, 2, 1, 2, 0, 2, 1, 3, 2, 3, 1],
+    [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
+    [1, 0, 0, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 0, 0, 0, 1, 3, 0, 2, 1],
+    [1, 0, 0, 0, 1, 3, 0, 2, 0, 2, 0, 2, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 2, 2, 2, 1, 2, 2, 2, 1, 0, 0, 0, 1, 2, 0, 2, 1],
+    [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
+    [1, 0, 0, 0, 1, 0, 2, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 2, 1, 0, 2, 0, 1, 0, 3, 0, 0, 0, 0, 2, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 2, 1, 0, 0, 3, 1, 0, 0, 2, 1, 2, 0, 0, 1],
+    [1, 0, 0, 2, 0, 2, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, 1, 0, 0, 2, 1],
+    [1, 0, 2, 0, 1, 0, 3, 0, 1, 3, 0, 0, 1, 2, 0, 2, 1, 2, 0, 0, 1],
+    [1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
+    [1, 2, 2, 2, 1, 0, 0, 0, 1, 0, 0, 3, 1, 2, 2, 2, 1, 2, 0, 2, 1],
+    [1, 2, 0, 2, 1, 0, 2, 0, 1, 0, 0, 0, 0, 2, 3, 2, 0, 0, 0, 0, 1],
+    [1, 2, 2, 2, 1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 2, 1, 2, 0, 2, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+];
 // 宣告一個全域變數，紀錄目前玩緊邊張圖 (預設係第一關)
 let currentMapData = mapLevel1;
 const TILE_SIZE = 40; // 每個格子的大小（像素）
@@ -322,6 +360,24 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
             { name: "圓形巨石", hp: 180, atk: 18, img: assets.monster2b },
             { name: "SSS蛟龍", hp: 200, atk: 15, img: assets.monster3b }
         ]
+    },
+    3: { 
+        name: "幾何遺跡", 
+        mapGrid: mapLevel3,            // 第三關用地圖 2
+        bgImg: assets.background3,        // 🌟 第三關新戰鬥背景
+        groundImg: assets.tileGround3, // 🌟 第三關新平地
+        wallImg: assets.tileWall3,     // 🌟 第三關新牆壁
+        grassImg: assets.tileGrass3,   // 第三關新草地
+        mapBossImg: assets.toround4,   // 👈 🌟 新增這行：第二關的地圖 Boss 圖案
+        startX: 1, startY: 1,          // 主角第三關出世位置
+        // 第三關 Boss
+        monsterName: "坐標海盜王", monsterHp: 240, monsterAtk: 45, monsterImg: assets.boss3,
+        // 第三關專屬草叢小怪 (🌟 新怪物！)
+        mobs: [
+            { name: "正方形兵", hp: 180, atk: 25, img: assets.monster1c },
+            { name: "圓形巨石", hp: 200, atk: 22, img: assets.monster2c },
+            { name: "SSS蛟龍", hp: 240, atk: 20, img: assets.monster3c }
+        ]
     }
     // ... 可以繼續加 3, 4, 5, 6 關 ...
 };
@@ -338,7 +394,12 @@ const allImages = [
     assets.background2,
     assets.tileGround2, assets.tileWall2, assets.tileGrass2,
     assets.monster1b, assets.monster2b, assets.monster3b, assets.boss2,
-    assets.toround3
+    assets.toround3,
+     // 第3關
+    assets.background3,
+    assets.tileGround3, assets.tileWall3, assets.tileGrass3,
+    assets.monster1c, assets.monster2c, assets.monster3c, assets.boss3,
+    assets.toround4
  
 ];
 
@@ -383,6 +444,19 @@ assets.monster2b.src = './img/ff/monster2b.png';
 assets.monster3b.src = './img/ff/monster3b.png';
 assets.boss2.src = './img/ff/boss2.png';
 assets.toround3.src = './img/ff/toround3.png';
+
+// 第3關圖片
+assets.background3.src = './img/ff/bg_island.png'; 
+assets.tileGround3.src = './img/ff/ground3.png'; 
+assets.tileWall3.src = './img/ff/coconut.png';     
+assets.tileGrass3.src = './img/ff/sea.png';
+    // 設定新怪獸路徑
+assets.monster1c.src = './img/ff/monster1c.png';
+assets.monster2c.src = './img/ff/monster2c.png';
+assets.monster3c.src = './img/ff/monster3c.png';
+assets.boss3.src = './img/ff/boss3.png';
+assets.toround4.src = './img/ff/toround4.png';
+
 
 
     
@@ -986,7 +1060,7 @@ function movePlayer(dx, dy) {
     let currentTile = currentMapData[nextY][nextX];
 
     if (currentTile === 4) {
-        document.getElementById('battleLog').innerText = "💀 遇見第一關 BOSS！";
+        document.getElementById('battleLog').innerText = "💀 遇見 BOSS！";
         player.lastTrapPos = {x: nextX, y: nextY}; 
         encounterType = "BOSS";
         startEncounterEffect();
@@ -997,7 +1071,7 @@ function movePlayer(dx, dy) {
         startEncounterEffect();
     } else if (currentTile === 2) {
         if (Math.random() < 0.15) {
-            document.getElementById('battleLog').innerText = "⚠️ 草叢有動靜！";
+            document.getElementById('battleLog').innerText = "⚠️ 有動靜！";
             encounterType = "RANDOM";
             startEncounterEffect();
         }
