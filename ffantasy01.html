@@ -182,6 +182,14 @@
 
 <script src="./questionsff.js"></script>
 <script>
+
+// 建立一個安全播放函式
+function playMusic(audioObj, volume = 0.2) {
+    audioObj.volume = volume; // 確保每次播放前都重新校正音量
+    audioObj.currentTime = 0; // 從頭開始播放
+    audioObj.play().catch(e => console.log("音樂播放受限:", e));
+}
+
 // ==========================================
 // 1. 遊戲基礎設定與全域變數
 // ==========================================
@@ -959,7 +967,7 @@ function winBattle() {
         gameState = "MAP";
         
         // 🎵 👇 關鍵修復：回到地圖時，重新播放地圖音樂！
-        sounds.mapBgm.play(); 
+        playMusic(sounds.mapBgm, 0.3); // 地圖音樂音量設定為 0.3
         
         player.hp = player.maxHp; // 過關補滿血
         isBusy = false;
@@ -1174,8 +1182,7 @@ function gameLoop() {
             gameState = "BATTLE";
             // 🌟 新增：切換音樂
             sounds.mapBgm.pause();
-            sounds.mapBgm.currentTime = 0;
-            sounds.battleBgm.play();
+            playMusic(sounds.battleBgm, 0.2); // 使用上面的函數，強制指定音量為 0.2
             
              let currentConfig = levelConfigs[currentLevel]; // 攞目前關卡資料          
             
