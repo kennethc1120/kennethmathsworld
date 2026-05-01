@@ -604,7 +604,7 @@ function startGame() {
     
 // 🌟 修正後的播放邏輯：只留這一段
     sounds.mapBgm.volume = 0.3; 
-    sounds.battleBgm.volume = 0.3; // 👈 新增這行！設定戰鬥音樂音量 (0.2表示20%，可依喜好微調)
+    sounds.battleBgm.volume = 0.2; // 👈 新增這行！設定戰鬥音樂音量 (0.2表示20%，可依喜好微調)
     sounds.mapBgm.play().then(() => {
         console.log("背景音樂播放成功");
     }).catch(error => {
