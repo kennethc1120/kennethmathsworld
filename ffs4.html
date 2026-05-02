@@ -652,7 +652,7 @@ draw(ctx) {
 const canvas = document.getElementById('battleCanvas');
 const ctx = canvas.getContext('2d');
 // 勇者可以保持不變，但建議用 let，方便日後升級加 HP
-let player = new Character("勇者", 100, 40, 80, 140, assets.player, 80, 80, true);
+let player = new Character("勇者", 150, 40, 80, 140, assets.player, 80, 80, true);
 
 // 🌟 怪物變成「動態生成」，根據 currentLevel 讀取資料
 let monster = new Character(
@@ -882,7 +882,7 @@ function checkAnswer(choice) {
             sounds.heal.play();   // 回復聲
             
             // 新增：必殺回復
-            let healAmount = Math.floor(player.maxHp * 0.7); // 回復 70% HP
+            let healAmount = Math.floor(player.maxHp * 0.9); // 回復 90% HP
             player.hp = Math.min(player.maxHp, player.hp + healAmount);
             player.sp = 0;
             // 顯示綠色回復文字
