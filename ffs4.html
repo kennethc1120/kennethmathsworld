@@ -624,12 +624,19 @@ draw(ctx) {
     }
     // ----------------------------------------------------
 
-    // 5. 繪製名字
-        ctx.fillStyle = "white"; 
+		// 5. 繪製名字 (Canvas 陰影版)
+		ctx.shadowColor = "rgba(0, 0, 0, 0.8)"; // 陰影顏色：黑色半透明
+		ctx.shadowBlur = 4;                    // 陰影模糊程度 (值越大越模糊)
+		ctx.shadowOffsetX = 1;                 // 陰影向右偏移
+		ctx.shadowOffsetY = 1;                 // 陰影向下偏移
+	
+		ctx.fillStyle = "white"; 
         ctx.font = "bold 12px Arial"; 
         ctx.textAlign = "center";
         ctx.fillText(this.name, rx + this.w / 2, this.y - 25); 
-        
+  		// 🌟 ⚠️ 重要：畫完字之後，一定要重置陰影，否則之後畫嘅所有嘢都會有陰影！
+		ctx.shadowColor = "transparent"; 
+		ctx.shadowBlur = 0;      
         ctx.restore();
     } // ⬅️ 確保 draw() 喺呢度閂括號完結！
 
