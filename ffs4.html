@@ -63,6 +63,37 @@
         }
         .opt-btn:hover:not(:disabled) { background: var(--accent); color: #1a1a2e; }
         .opt-btn:disabled { opacity: 0.5; }
+	/* ========================================== */
+	/* 🌟 新增的開場圖樣式 */
+	/* ========================================== */
+
+	/* 裝住圖嘅容器，確保佢永遠置中 */
+	#splash-art-container {
+	    width: 100%;
+	    display: flex;
+	    justify-content: center;
+	    align-items: center;
+	    margin-bottom: -30px; /* 將張圖往下推，讓佢稍微接近 Title，可以按喜好微調 */
+	    z-index: 101; /* 確保佢在 Title 之上，Title 的顏色才不會擋住圖 */
+	}
+
+	/* 張圖嘅實際樣式 */
+	#splash-art-image {
+	    max-width: 80%; /* 限制圖的最大寬度，避免在電腦版過大 */
+	    max-height: 40dvh; /* 🌟 關鍵：限制圖的最大高度，避免擋住下方的輸入框和按鈕 */
+	    height: auto; /* 保持比例 */
+	    object-fit: contain; /* 確保整張圖都顯示，不被裁切 */
+	    border-radius: 15px; /* 加點圓角，更有手遊 feel */
+	    box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* 加陰影，增加立體感 */
+	}
+
+	/* 稍微調整原本的 Title，讓佢唔好貼太近張圖 */
+	#start-screen h1 {
+	    position: relative;
+	    z-index: 102; /* 讓 Title 的層級高於張圖的容器，保持 Title 的互動性 */
+	    margin-top: 10px; /* 如果有 margin-bottom 負值，這裡要補一點 top margin */
+	}
+
 
         #battleLog { font-size: 14px; color: #aaa; margin-top: 15px; text-align: center; height: 20px; }
         /* 必殺技按鈕呼吸燈效果 */
@@ -133,7 +164,10 @@
 <body>
 <button id="mute-btn" onclick="toggleMute()" style="position:fixed; top:10px; right:10px; z-index:1001;">🔊</button>
 <div id="start-screen">
-    <h1 style="color:var(--accent)">數學First Fantasy</h1>
+    <div id="splash-art-container">
+        <img src="./img/ff/feading.png" alt="開場圖" id="splash-art-image">
+    </div>
+    <h1 style="color:var(--accent)">Final Exam Fantasy (S.4)</h1>
     
     <div id="leaderboard" style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; margin-bottom: 20px; min-width: 250px; text-align: left;">
         <h3 style="color: gold; text-align: center; margin-top: 0;">🏆 勇士龍虎榜 Top 10</h3>
@@ -325,7 +359,7 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
 // 🌟 第三步：最後先設定 levelConfigs (呢度先可以安全地用 assets 同 mapLevelX)
     const levelConfigs = {
     1: { 
-        name: "代數之森", 
+        name: "上學期之森", 
         mapGrid: mapLevel1,           // 第一關用地圖 1
         bgImg: assets.background,     // 第一關戰鬥背景
         groundImg: assets.tileGround, // 第一關平地
@@ -334,16 +368,16 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
         mapBossImg: assets.toround2,  // 👈 🌟 新增這行：第一關的地圖 Boss 圖案
         startX: 1, startY: 1,         // 主角第一關出世位置
         // 第一關 Boss
-        monsterName: "代數小王子", monsterHp: 150, monsterAtk: 25, monsterImg: assets.boss,
+        monsterName: "方程小王子", monsterHp: 150, monsterAtk: 25, monsterImg: assets.boss,
         // 第一關專屬草叢小怪
         mobs: [
             { name: "數學小兵", hp: 100, atk: 12, img: assets.monster1 },
-            { name: "Log Buddy", hp: 120, atk: 14, img: assets.monster2 },
-            { name: "方程 惡魔", hp: 150, atk: 10, img: assets.monster3 }
+            { name: "HCF Buddy", hp: 120, atk: 14, img: assets.monster2 },
+            { name: "多項式 惡魔", hp: 150, atk: 10, img: assets.monster3 }
         ]
     },
     2: { 
-        name: "幾何遺跡", 
+        name: "下學期遺跡", 
         mapGrid: mapLevel2,            // 第二關用地圖 2
         bgImg: assets.background2,        // 🌟 第二關新戰鬥背景
         groundImg: assets.tileGround2, // 🌟 第二關新平地
@@ -352,16 +386,16 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
         mapBossImg: assets.toround3,   // 👈 🌟 新增這行：第二關的地圖 Boss 圖案
         startX: 1, startY: 1,          // 主角第二關出世位置
         // 第二關 Boss
-        monsterName: "幾何石魔", monsterHp: 200, monsterAtk: 35, monsterImg: assets.boss2,
+        monsterName: "Log女王", monsterHp: 200, monsterAtk: 35, monsterImg: assets.boss2,
         // 第二關專屬草叢小怪 (🌟 新怪物！)
         mobs: [
-            { name: "正方形兵", hp: 130, atk: 20, img: assets.monster1b },
-            { name: "圓形巨石", hp: 180, atk: 18, img: assets.monster2b },
-            { name: "SAS蛟龍", hp: 200, atk: 15, img: assets.monster3b }
+            { name: "指數兵", hp: 130, atk: 20, img: assets.monster1b },
+            { name: "方程巨石", hp: 180, atk: 18, img: assets.monster2b },
+            { name: "變分蛟龍", hp: 200, atk: 15, img: assets.monster3b }
         ]
     },
     3: { 
-        name: "XY海島", 
+        name: "Kenneth Land", 
         mapGrid: mapLevel3,            // 第三關用地圖 2
         bgImg: assets.background3,        // 🌟 第三關新戰鬥背景
         groundImg: assets.tileGround3, // 🌟 第三關新平地
@@ -370,12 +404,12 @@ const TILE_SIZE = 40; // 每個格子的大小（像素）
         mapBossImg: assets.toround4,   // 👈 🌟 新增這行：第二關的地圖 Boss 圖案
         startX: 1, startY: 1,          // 主角第三關出世位置
         // 第三關 Boss
-        monsterName: "坐標海盜王", monsterHp: 240, monsterAtk: 45, monsterImg: assets.boss3,
+        monsterName: "Kenneth海盜王", monsterHp: 300, monsterAtk: 50, monsterImg: assets.boss3,
         // 第三關專屬草叢小怪 (🌟 新怪物！)
         mobs: [
-            { name: "原點怪", hp: 180, atk: 25, img: assets.monster1c },
-            { name: "軌跡神獸", hp: 200, atk: 22, img: assets.monster2c },
-            { name: "平行猿猴", hp: 240, atk: 20, img: assets.monster3c }
+            { name: "MC怪", hp: 180, atk: 25, img: assets.monster1c },
+            { name: "短答神獸", hp: 200, atk: 22, img: assets.monster2c },
+            { name: "長答猿猴", hp: 240, atk: 20, img: assets.monster3c }
         ]
     }
     // ... 可以繼續加 3, 4, 5, 6 關 ...
@@ -942,7 +976,7 @@ function winBattle() {
         if (encounterType === "BOSS") {
             currentLevel++;
             
-            if (currentLevel > 3) {
+            if (currentLevel > 6) {
                 alert("🎉 恭喜你！你已經通關所有 DSE 數學挑戰！");
                 gameState = "END";
                 submitScore(currentLevel);
@@ -1201,10 +1235,10 @@ function gameLoop() {
 
     } else if (gameState === "BATTLE") {
         player.x = canvas.width * 0.1;  
-        player.y = canvas.height * 0.72 - player.h; // 🌟 微調：減去自身高度避免超出底部
+        player.y = canvas.height * 0.75 - player.h; // 🌟 微調：減去自身高度避免超出底部
         
         monster.x = canvas.width * 0.6; 
-        monster.y = canvas.height * 0.65 - monster.h;
+        monster.y = canvas.height * 0.60 - monster.h;
 
         // 🌟 關鍵修復：畫目前關卡專屬嘅戰鬥背景
         let bg = levelConfigs[currentLevel].bgImg || assets.background;
