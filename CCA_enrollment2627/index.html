@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中學課外活動即時連線報名系統</title>
+    <title>張煊昌中學聯課活動學會報名系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
@@ -14,18 +14,18 @@
         <!-- 連線載入狀態遮罩 -->
         <div v-if="isLoading" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col justify-center items-center text-white">
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white mb-4"></div>
-            <p class="text-lg font-semibold">正在同步雲端資料庫，請稍候...</p>
+            <p class="text-lg font-semibold">{{ loadingText }}</p>
         </div>
 
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-lg shadow-md mb-6 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-900">課外活動即時連線報名系統 🌐</h1>
-                <p class="text-sm text-gray-500">雲端連線版 • 每學會限額：1000人 • 所有會合同步招生中</p>
+                <p class="text-sm text-gray-500">雲端連線版 • 動態名額限制 • 所有會合同步招生中</p>
             </div>
             <div class="flex items-center space-x-2 w-full md:w-auto">
                 <span class="font-semibold text-gray-700 whitespace-nowrap">負責學會：</span>
                 <select v-model="currentClubName" class="w-full md:w-auto border border-gray-300 rounded px-3 py-1.5 bg-gray-50 font-bold text-blue-800" @change="resetInput">
-                    <option v-for="name in clubs" :key="name" :value="name">{{ name }}</option>
+                    <option v-for="club in clubs" :key="club.name" :value="club.name">{{ club.name }}</option>
                 </select>
             </div>
         </header>
@@ -38,8 +38,11 @@
                     <h2 class="text-lg font-bold text-gray-800 mb-4">學會名額狀態</h2>
                     <div class="flex justify-between items-end mb-2">
                         <span class="text-sm text-gray-600">已報名人數 / 上限</span>
-                        <span class="text-2xl font-bold text-blue-600">{{ currentClubMembers.length }} / 1000</span>
+                        <span class="text-2xl font-bold" :class="isClubFull ? 'text-red-600' : 'text-blue-600'">
+                            {{ currentClubMembers.length }} / {{ currentClubLimit }}
+                        </span>
                     </div>
+                    <div v-if="isClubFull" class="text-xs text-red-500 font-bold text-right mt-1">⚠️ 該學會名額已滿！</div>
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-md">
@@ -55,11 +58,11 @@
 
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-1">學號 (支援條碼槍)</label>
-                            <input ref="studentIdInput" v-model="inputStudentId" type="text" placeholder="例如: 10001" class="w-full border border-gray-300 rounded px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono" required />
+                            <input ref="studentIdInput" v-model="inputStudentId" type="text" placeholder="請輸入或掃描學號" class="w-full border border-gray-300 rounded px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono" required />
                         </div>
 
-                        <button type="submit" class="w-full py-3 px-4 rounded text-white font-bold text-lg bg-blue-600 hover:bg-blue-700 transition-colors">
-                            確認報名並上傳雲端
+                        <button type="submit" :disabled="isClubFull" class="w-full py-3 px-4 rounded text-white font-bold text-lg transition-colors" :class="isClubFull ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'">
+                            {{ isClubFull ? '名額已滿，停止報名' : '確認報名並上傳雲端' }}
                         </button>
                     </form>
 
@@ -119,33 +122,39 @@
 
         createApp({
             setup() {
-                // 請在此處貼上您部署 Google Apps Script 後取得的網頁應用程式 URL
+                // 請保持填寫您部署 Google Apps Script 後取得的網頁應用程式 URL
                 const GAS_URL = "https://script.google.com/macros/s/AKfycbwu4gRHmVBm3O5yNAVUTbsXNTYc3g4RL58PzKNGAb0bBoMApQRNSCzDz1h4bymGFtCA/exec"; 
 
-                const clubs = ref([
-                    "童 軍", "女童軍", "紅十字青年團", "升旗領袖生", "戲劇學會", "英語話劇組", "合唱團", 
-                    "步操管樂隊", "敲擊樂隊", "流行樂隊", "午間歌曲點唱站", "英語節慶文化學會", "英文電影欣賞會", 
-                    "英語演說學會", "藝文學會", "創客學會", "咖啡拉花班", "城市漫遊隊", "科學探究社", 
-                    "視藝研究學會", "家政學會", "英文閱讀班", "校園記者培訓班", "數學棋趣社", "思數空間", 
-                    "校園電視台培訓班", "攝影學會", "茶藝學會", "禪繞繪畫班", "皮革工作坊", "桌遊樂", 
-                    "花式跳繩隊", "合球隊"
-                ]);
-
-                const classes = ref(['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B']);
-                const currentClubName = ref("童 軍");
+                // 動態從雲端載入的資料庫
+                const clubs = ref([]);         // 由 GAS 回傳的 { name: "童軍", limit: 30 } 陣列
+                const classes = ref([]);       // 由 GAS 回傳的 班別清單
+                const studentDatabase = ref([]); 
+                const registrations = ref([]);   
+                
+                const currentClubName = ref("");
                 const inputClass = ref('');
                 const inputStudentId = ref('');
                 const message = ref('');
                 const messageType = ref('success');
                 const isLoading = ref(true);
-                
-                const studentDatabase = ref([]); // 從雲端載入
-                const registrations = ref([]);   // 從雲端載入
+                const loadingText = ref("正在同步雲端資料庫，請稍候...");
                 const studentIdInput = ref(null);
+
+                // 計算目前選取學會的上限人數
+                const currentClubLimit = computed(() => {
+                    const found = clubs.value.find(c => c.name === currentClubName.value);
+                    return found ? found.limit : 1000; // 預設防呆 1000
+                });
+
+                // 檢查目前學會是否已滿
+                const isClubFull = computed(() => {
+                    return currentClubMembers.value.length >= currentClubLimit.value;
+                });
 
                 // 從雲端試算表同步資料
                 const syncData = async () => {
                     isLoading.value = true;
+                    loadingText.value = "正在同步雲端資料庫，請稍候...";
                     try {
                         const response = await fetch(GAS_URL, {
                             method: "POST",
@@ -155,6 +164,16 @@
                         if (data.status === "success") {
                             studentDatabase.value = data.students;
                             registrations.value = data.regs;
+                            classes.value = data.classes || [];
+                            
+                            // 更新學會清單
+                            if (data.clubs && data.clubs.length > 0) {
+                                clubs.value = data.clubs;
+                                // 如果目前沒選學會，預設選第一個
+                                if (!currentClubName.value && clubs.value.length > 0) {
+                                    currentClubName.value = clubs.value[0].name;
+                                }
+                            }
                         }
                     } catch (error) {
                         alert("同步失敗，請檢查網路連線或 GAS URL 設定！");
@@ -163,10 +182,14 @@
                     }
                 };
 
-                onMounted(() => { if(GAS_URL !== "YOUR_GAS_WEB_APP_URL") syncData(); else { alert("請先填寫程式碼中的 GAS_URL 網址！"); isLoading.value = false; }});
+                onMounted(() => { 
+                    if(GAS_URL !== "YOUR_GAS_WEB_APP_URL") syncData(); 
+                    else { alert("請先填寫程式碼中的 GAS_URL 網址！"); isLoading.value = false; }
+                });
 
                 const currentClubMembers = computed(() => {
-                    return registrations.value.filter(r => r.clubName === currentClubName.value);
+                    // 倒序排列，新報名的顯示在最上面
+                    return registrations.value.filter(r => r.clubName === currentClubName.value).reverse();
                 });
 
                 const messageClass = computed(() => {
@@ -175,9 +198,15 @@
 
                 // 連線登記報名
                 const handleRegister = async () => {
+                    if (isClubFull.value) {
+                        showMsg("❌ 登記失敗！該學會名額已滿。", "error");
+                        return;
+                    }
+                    
                     const sid = inputStudentId.value.trim();
                     const sClass = inputClass.value;
                     isLoading.value = true;
+                    loadingText.value = "正在上傳報名資料...";
 
                     try {
                         const response = await fetch(GAS_URL, {
@@ -193,7 +222,6 @@
 
                         if (result.status === "success") {
                             showMsg(`✅ 雲端同步錄取：${sClass} ${result.name} (${sid})`, 'success');
-                            // 在地端狀態即時追加，減少再次全量同步的等待
                             registrations.value.push({
                                 clubName: currentClubName.value,
                                 sClass: sClass,
@@ -216,6 +244,7 @@
                 const removeMember = async (studentId) => {
                     if (!confirm(`確定要從雲端刪除學號 ${studentId} 的登記嗎？`)) return;
                     isLoading.value = true;
+                    loadingText.value = "正在從雲端撤銷報名...";
                     try {
                         const response = await fetch(GAS_URL, {
                             method: "POST",
@@ -241,8 +270,9 @@
                 const resetInput = () => { inputStudentId.value = ''; message.value = ''; };
 
                 return {
-                    clubs, classes, currentClubName, inputClass, inputStudentId, message, isLoading,
-                    currentClubMembers, messageClass, studentIdInput, handleRegister, removeMember, resetInput, syncData
+                    clubs, classes, currentClubName, inputClass, inputStudentId, message, isLoading, loadingText,
+                    currentClubMembers, messageClass, studentIdInput, currentClubLimit, isClubFull,
+                    handleRegister, removeMember, resetInput, syncData
                 };
             }
         }).mount('#app');
