@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中學課外活動報名系統 - 學生即時查詢入口</title>
+    <title>香港中文大學校友會聯會張煊昌中學 學會報名系統 - 學生查詢網頁</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
@@ -22,10 +22,10 @@
                 🔍
             </div>
             <h2 class="mt-4 text-center text-2xl font-extrabold text-gray-950">
-                課外活動報名查詢 💬
+                香港中文大學校友會聯會張煊昌中學 學會報名查詢 💬
             </h2>
             <p class="mt-2 text-center text-xs text-gray-500">
-                請輸入您的基本資料，即可確認目前的錄取學會
+                請輸入您的基本資料與專屬密碼，即可確認目前的錄取學會
             </p>
         </div>
 
@@ -42,11 +42,15 @@
                     <label class="block text-sm font-bold text-gray-700 mb-1">您的學號</label>
                     <input v-model="inputStudentId" type="text" placeholder="例如: 10001" class="appearance-none rounded-md relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base font-mono" required />
                 </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">學生查詢密碼</label>
+                    <input v-model="inputStudentPassword" type="password" placeholder="請輸入您的個人密碼" class="appearance-none rounded-md relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base font-mono" required />
+                </div>
             </div>
 
             <div>
                 <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-lg font-bold rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                    開始查詢
+                    驗證並查詢
                 </button>
             </div>
         </form>
@@ -98,9 +102,10 @@
                 // ⚠️ 請在此處貼上您部署 Google Apps Script 後取得的網頁應用程式 URL 
                 const GAS_URL = "https://script.google.com/macros/s/AKfycbwu4gRHmVBm3O5yNAVUTbsXNTYc3g4RL58PzKNGAb0bBoMApQRNSCzDz1h4bymGFtCA/exec"; 
 
-                const classes = ref([]); // 載入雲端現有的開放班別
+                const classes = ref([]); 
                 const inputClass = ref('');
                 const inputStudentId = ref('');
+                const inputStudentPassword = ref(''); // 新增：學生密碼綁定
                 const isLoading = ref(true);
                 const queryResult = ref(null);
                 const errorMsg = ref('');
@@ -133,7 +138,7 @@
                     }
                 });
 
-                // 發送個人報名查詢
+                // 發送個人報名查詢 (附帶密碼)
                 const handleQuery = async () => {
                     isLoading.value = true;
                     queryResult.value = null;
@@ -145,7 +150,8 @@
                             body: JSON.stringify({
                                 action: "query",
                                 studentId: inputStudentId.value.trim(),
-                                sClass: inputClass.value
+                                sClass: inputClass.value,
+                                studentPassword: inputStudentPassword.value.trim() // 傳送密碼供驗證
                             })
                         });
                         const result = await response.json();
@@ -163,7 +169,7 @@
                 };
 
                 return {
-                    classes, inputClass, inputStudentId, isLoading, queryResult, errorMsg, handleQuery
+                    classes, inputClass, inputStudentId, inputStudentPassword, isLoading, queryResult, errorMsg, handleQuery
                 };
             }
         }).mount('#app');
