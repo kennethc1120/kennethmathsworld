@@ -28,7 +28,6 @@
                 請輸入您的基本資料與專屬密碼，即可確認目前的錄取學會（每人最多5個）
             </p>
         </div>
-
         <form class="mt-8 space-y-6" @submit.prevent="handleQuery">
             <div class="rounded-md shadow-sm space-y-4">
                 <div>
@@ -55,7 +54,7 @@
             </div>
         </form>
 
-        <!-- 📊 查詢結果區塊 (全新多學會顯示介面) -->
+        <!-- 📊 查詢結果區塊 (新增職位顯示) -->
         <div v-if="queryResult" class="mt-6 border-t pt-6">
             <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase mb-3">查詢結果</h3>
             
@@ -76,9 +75,14 @@
                     
                     <div class="space-y-2">
                         <div v-for="(club, idx) in queryResult.registeredClubs" :key="idx" class="p-3 bg-white border border-green-200 rounded-md shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                            <div class="flex items-center">
-                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-green-600 text-white font-mono text-xs font-bold mr-2">{{ idx + 1 }}</span>
+                            <div class="flex items-center flex-wrap gap-2">
+                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-green-600 text-white font-mono text-xs font-bold">{{ idx + 1 }}</span>
                                 <span class="text-base font-black text-gray-800">{{ club.clubName }}</span>
+                                
+                                <!-- 🎖️ 智慧動態職位標籤 -->
+                                <span :class="getPositionClass(club.position)" class="text-[11px] px-2 py-0.5 rounded-md font-bold tracking-wide">
+                                    {{ club.position }}
+                                </span>
                             </div>
                             <span class="text-[10px] text-gray-400 font-mono sm:text-right">⏱️ {{ club.regTime }}</span>
                         </div>
@@ -108,7 +112,6 @@
 
         createApp({
             setup() {
-                // ⚠️ 請保持填寫您部署 Google Apps Script 後取得的網頁應用程式 URL
                 const GAS_URL = "https://script.google.com/macros/s/AKfycbwu4gRHmVBm3O5yNAVUTbsXNTYc3g4RL58PzKNGAb0bBoMApQRNSCzDz1h4bymGFtCA/exec"; 
 
                 const classes = ref([]); 
@@ -118,6 +121,19 @@
                 const isLoading = ref(true);
                 const queryResult = ref(null);
                 const errorMsg = ref('');
+
+                // 根據職位關鍵字給予不同的精緻顏色
+                const getPositionClass = (position) => {
+                    if (!position) return 'bg-gray-100 text-gray-600';
+                    if (position.includes('主席') || position.includes('隊長') || position.includes('社長')) {
+                        return 'bg-amber-100 text-amber-800 border border-amber-200 shadow-sm'; // 金黃領袖色
+                    } else if (position.includes('副')) {
+                        return 'bg-blue-100 text-blue-800 border border-blue-200'; // 藍色副手色
+                    } else if (position.includes('幹事') || position.includes('委員') || position.includes('書記') || position.includes('財政')) {
+                        return 'bg-purple-100 text-purple-800 border border-purple-200'; // 紫色骨幹色
+                    }
+                    return 'bg-gray-100 text-gray-600 border border-gray-200'; // 灰色會員色
+                };
 
                 const loadClasses = async () => {
                     isLoading.value = true;
@@ -138,12 +154,7 @@
                 };
 
                 onMounted(() => {
-                    if (GAS_URL !== "YOUR_GAS_WEB_APP_URL") {
-                        loadClasses();
-                    } else {
-                        alert("請先修改程式碼中的 GAS_URL 設定！");
-                        isLoading.value = false;
-                    }
+                    loadClasses();
                 });
 
                 const handleQuery = async () => {
@@ -176,7 +187,7 @@
                 };
 
                 return {
-                    classes, inputClass, inputStudentId, inputStudentPassword, isLoading, queryResult, errorMsg, handleQuery
+                    classes, inputClass, inputStudentId, inputStudentPassword, isLoading, queryResult, errorMsg, handleQuery, getPositionClass
                 };
             }
         }).mount('#app');
