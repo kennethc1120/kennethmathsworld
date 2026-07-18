@@ -141,7 +141,7 @@
                     try {
                         const response = await fetch(GAS_URL, {
                             method: "POST",
-                            body: JSON.stringify({ action: "init" })
+                            body: JSON.stringify({ action: "init", clientPassword: "" }) // 查詢系統這裡務必留空或不傳，後端才不會報錯，且能順利拿到班級清單
                         });
                         const data = await response.json();
                         if (data.status === "success") {
