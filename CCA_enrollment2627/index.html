@@ -81,9 +81,17 @@
                                 </select>
                             </div>
 
-                            <div class="mb-6">
+                            <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">學號 (支援條碼槍)</label>
                                 <input ref="studentIdInput" v-model="inputStudentId" type="text" placeholder="請輸入或掃描學號" class="w-full border border-gray-300 rounded px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono" required />
+                            </div>
+
+                            <!-- 🎖️ 新增功能：擔任崗位選擇器 -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">擔任崗位</label>
+                                <select v-model="selectedPosition" class="w-full border border-gray-300 rounded px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" required>
+                                    <option v-for="pos in positions" :key="pos" :value="pos">{{ pos }}</option>
+                                </select>
                             </div>
 
                             <button type="submit" :disabled="isClubFull" class="w-full py-3 px-4 rounded text-white font-bold text-lg transition-colors" :class="isClubFull ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'">
@@ -116,6 +124,8 @@
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">班別</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">學號</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">學生姓名</th>
+                                            <!-- 🎖️ 表格新增顯示欄位 -->
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">職位崗位</th>
                                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
                                         </tr>
                                     </thead>
@@ -125,12 +135,18 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-2 py-1 bg-gray-100 rounded font-semibold">{{ member.sClass }}</span></td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-semibold">{{ member.studentId }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">{{ member.name }}</td>
+                                            <!-- 🎖️ 顯示該學生被核准的崗位 -->
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <span class="px-2 py-0.5 text-xs rounded font-medium" :class="member.position === '會員' || !member.position ? 'bg-slate-100 text-slate-700' : 'bg-amber-100 text-amber-800 font-bold'">
+                                                    {{ member.position || '會員' }}
+                                                </span>
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <button @click="removeMember(member.studentId)" class="text-red-600 hover:text-red-900 font-bold">撤銷</button>
                                             </td>
                                         </tr>
                                         <tr v-if="currentClubMembers.length === 0">
-                                            <td colspan="5" class="px-6 py-12 text-center text-gray-400">📭 目前暫無學生報名。</td>
+                                            <td colspan="6" class="px-6 py-12 text-center text-gray-400">📭 目前暫無學生報名。</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -160,6 +176,10 @@
                 const studentDatabase = ref([]); 
                 const registrations = ref([]);   
                 
+                // 🎖️ 新增：崗位設定的響應式變數
+                const positions = ref(['會員']); 
+                const selectedPosition = ref('會員');
+                
                 const currentClubName = ref("");
                 const inputClass = ref('');
                 const inputStudentId = ref('');
@@ -178,6 +198,31 @@
                     return currentClubMembers.value.length >= currentClubLimit.value;
                 });
 
+                // 處理初始化回傳的資料格式
+                const parseInitData = (data) => {
+                    studentDatabase.value = data.students;
+                    registrations.value = data.regs;
+                    classes.value = data.classes || [];
+                    
+                    // 同步 E 欄讀取出來的職位清單
+                    if (data.positions && data.positions.length > 0) {
+                        positions.value = data.positions;
+                        // 確保預設值仍優先選「會員」，若無則指向第一個職位
+                        if (positions.value.includes('會員')) {
+                            selectedPosition.value = '會員';
+                        } else {
+                            selectedPosition.value = positions.value[0];
+                        }
+                    }
+
+                    if (data.clubs && data.clubs.length > 0) {
+                        clubs.value = data.clubs;
+                        if (!currentClubName.value && clubs.value.length > 0) {
+                            currentClubName.value = clubs.value[0].name;
+                        }
+                    }
+                };
+
                 const verifyPassword = async () => {
                     if (!passwordInput.value.trim()) return;
                     isLoading.value = true;
@@ -195,16 +240,7 @@
                         
                         if (data.status === "success") {
                             isAuthorized.value = true;
-                            studentDatabase.value = data.students;
-                            registrations.value = data.regs;
-                            classes.value = data.classes || [];
-                            
-                            if (data.clubs && data.clubs.length > 0) {
-                                clubs.value = data.clubs;
-                                if (!currentClubName.value && clubs.value.length > 0) {
-                                    currentClubName.value = clubs.value[0].name;
-                                }
-                            }
+                            parseInitData(data);
                         } else {
                             loginError.value = data.message || "系統密碼錯誤，請重新輸入！";
                         }
@@ -229,12 +265,7 @@
                         });
                         const data = await response.json();
                         if (data.status === "success") {
-                            studentDatabase.value = data.students;
-                            registrations.value = data.regs;
-                            classes.value = data.classes || [];
-                            if (data.clubs && data.clubs.length > 0) {
-                                clubs.value = data.clubs;
-                            }
+                            parseInitData(data);
                         }
                     } catch (error) {
                         alert("同步失敗，請檢查網路連線或 GAS URL 設定！");
@@ -259,6 +290,8 @@
                     
                     const sid = inputStudentId.value.trim();
                     const sClass = inputClass.value;
+                    const pos = selectedPosition.value; // 取得所選崗位
+                    
                     isLoading.value = true;
                     loadingText.value = "正在上傳報名資料...";
 
@@ -270,20 +303,28 @@
                                 studentId: sid,
                                 sClass: sClass,
                                 clubName: currentClubName.value,
+                                position: pos, // 🎖️ 將崗位傳送至 GAS 後端
                                 clientPassword: passwordInput.value.trim() 
                             })
                         });
                         const result = await response.json();
 
                         if (result.status === "success") {
-                            showMsg(`✅ 雲端同步錄取：${sClass} ${result.name} (${sid})`, 'success');
+                            showMsg(`✅ 雲端同步錄取：${sClass} ${result.name} (${sid}) - [${pos}]`, 'success');
                             registrations.value.push({
                                 clubName: currentClubName.value,
                                 sClass: sClass,
                                 studentId: sid,
-                                name: result.name
+                                name: result.name,
+                                position: pos // 🎖️ 同步推入前端顯示陣列中
                             });
+                            
                             inputStudentId.value = '';
+                            // 批次輸入優化：成功登記後將崗位重置回「會員」
+                            if (positions.value.includes('會員')) {
+                                selectedPosition.value = '會員';
+                            }
+                            
                             nextTick(() => { studentIdInput.value.focus(); });
                         } else {
                             showMsg(result.message, 'error');
@@ -326,7 +367,7 @@
 
                 return {
                     isAuthorized, passwordInput, loginError, verifyPassword,
-                    clubs, classes, currentClubName, inputClass, inputStudentId, message, isLoading, loadingText,
+                    clubs, classes, positions, selectedPosition, currentClubName, inputClass, inputStudentId, message, isLoading, loadingText,
                     currentClubMembers, messageClass, studentIdInput, currentClubLimit, isClubFull,
                     handleRegister, removeMember, resetInput, syncData
                 };
