@@ -3,116 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港中文大學校友會聯會張煊昌中學 學會報名系統</title>
+    <title>香港中文大學校友會聯會張煊昌中學 學會報名查詢系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen font-sans flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+<body class="bg-blue-50 min-h-screen font-sans flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
 
-    <div id="app" class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-xl border border-gray-200 relative">
+    <div id="app" class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg border border-gray-100 relative">
         
-        <!-- 全域連線遮罩 -->
+        <!-- 連線中遮罩 -->
         <div v-if="isLoading" class="absolute inset-0 bg-white bg-opacity-80 rounded-xl z-50 flex flex-col justify-center items-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-slate-700 mb-3"></div>
-            <p class="text-sm font-semibold text-gray-600">正在處理中，請稍候...</p>
+            <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 mb-3"></div>
+            <p class="text-sm font-semibold text-gray-600">正在向雲端查詢，請稍候...</p>
         </div>
 
         <div>
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-slate-100 text-slate-700 text-3xl">
-                💼
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 text-3xl">
+                🔍
             </div>
-            <h2 class="mt-4 text-center text-2xl font-extrabold text-gray-900">
-                學會名單行政登錄 
+            <h2 class="mt-4 text-center text-2xl font-extrabold text-gray-950">
+                香港中文大學校友會聯會張煊昌中學 學會報名查詢 💬
             </h2>
             <p class="mt-2 text-center text-xs text-gray-500">
-                【老師專用內部通道】密碼由系統設定 J2 指定，崗位清單同步自 E 欄
+                請輸入您的基本資料與專屬密碼，即可確認目前的錄取學會（每人最多5個）
             </p>
         </div>
-
-        <form class="mt-8 space-y-4" @submit.prevent="handleRegister">
-            <div class="space-y-4 rounded-md">
-                
-                <!-- 1. 老師安全驗證碼 (對應 J2) -->
+        <form class="mt-8 space-y-6" @submit.prevent="handleQuery">
+            <div class="rounded-md shadow-sm space-y-4">
                 <div>
-                    <label class="block text-sm font-bold text-red-700 mb-1">🔑 報名密碼 (請輸入系統設定 J2 密碼)</label>
-                    <input v-model="teacherPassword" type="password" placeholder="請輸入老師登記驗證碼" class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-slate-600 focus:border-slate-600 text-base font-mono bg-amber-50/50" required />
-                </div>
-
-                <hr class="border-gray-200 my-2"/>
-
-                <!-- 2. 選擇負責的學會 -->
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">📌 負責學會/隊伍</label>
-                    <select v-model="selectedClub" class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 text-gray-900 focus:outline-none focus:ring-slate-500 focus:border-slate-500 text-base bg-white" required>
-                        <option value="">請選擇您要登錄名單的學會...</option>
-                        <option v-for="club in clubs" :key="club" :value="club">{{ club }}</option>
-                    </select>
-                </div>
-
-                <!-- 3. 選擇學生班別 -->
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">📊 學生班別</label>
-                    <select v-model="inputClass" class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 text-gray-900 focus:outline-none focus:ring-slate-500 focus:border-slate-500 text-base bg-white" required>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">您的班別</label>
+                    <select v-model="inputClass" class="appearance-none rounded-md relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base" required>
                         <option value="">請選擇班別...</option>
                         <option v-for="c in classes" :key="c" :value="c">{{ c }}</option>
                     </select>
                 </div>
-
-                <!-- 4. 輸入學生學號 -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">🆔 學生學號</label>
-                    <input v-model="inputStudentId" type="text" ref="studentIdInput" placeholder="請輸入學生學號" class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-slate-500 focus:border-slate-500 text-base font-mono" required />
+                    <label class="block text-sm font-bold text-gray-700 mb-1">您的學號</label>
+                    <input v-model="inputStudentId" type="text" placeholder="例如: 10001" class="appearance-none rounded-md relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base font-mono" required />
                 </div>
-
-                <!-- 5. 【動態讀取】選擇擔任的崗位職位 -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">🎖️ 擔任崗位 (資料取自系統設定 E 欄)</label>
-                    <select v-model="selectedPosition" class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 text-gray-900 focus:outline-none focus:ring-slate-500 focus:border-slate-500 text-base bg-white" required>
-                        <option v-for="pos in positions" :key="pos" :value="pos">{{ pos }}</option>
-                    </select>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">學生查詢密碼</label>
+                    <input v-model="inputStudentPassword" type="password" placeholder="請輸入您的個人密碼" class="appearance-none rounded-md relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base font-mono" required />
                 </div>
-
             </div>
 
-            <div class="pt-2">
-                <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent text-base font-bold rounded-md text-white bg-slate-800 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors shadow">
-                    確認登錄此學生
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-lg font-bold rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    驗證並查詢
                 </button>
             </div>
         </form>
 
-        <!-- 狀態提示回饋 -->
-        <div v-if="hintMsg" :class="isSuccess ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'" class="mt-4 p-4 border rounded-md text-sm font-semibold whitespace-pre-line">
-            {{ isSuccess ? '🚀 ' : '❌ ' }}{{ hintMsg }}
+        <!-- 📊 查詢結果區塊 (新增職位顯示) -->
+        <div v-if="queryResult" class="mt-6 border-t pt-6">
+            <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase mb-3">查詢結果</h3>
+            
+            <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm text-gray-500">學生姓名</span>
+                    <span class="text-lg font-bold text-gray-900">{{ queryResult.name }} ({{ queryResult.sClass }} 班)</span>
+                </div>
+                
+                <hr class="my-2 border-gray-200" />
+
+                <!-- 狀態一：學生有報名至少一個學會 -->
+                <div v-if="queryResult.registeredClubs && queryResult.registeredClubs.length > 0">
+                    <div class="text-xs text-green-600 font-bold mb-3 flex justify-between items-center">
+                        <span>🎉 已成功錄取以下學會：</span>
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">{{ queryResult.registeredClubs.length }} / 5 個</span>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div v-for="(club, idx) in queryResult.registeredClubs" :key="idx" class="p-3 bg-white border border-green-200 rounded-md shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                            <div class="flex items-center flex-wrap gap-2">
+                                <span class="w-5 h-5 flex items-center justify-center rounded-full bg-green-600 text-white font-mono text-xs font-bold">{{ idx + 1 }}</span>
+                                <span class="text-base font-black text-gray-800">{{ club.clubName }}</span>
+                                
+                                <!-- 🎖️ 智慧動態職位標籤 -->
+                                <span :class="getPositionClass(club.position)" class="text-[11px] px-2 py-0.5 rounded-md font-bold tracking-wide">
+                                    {{ club.position }}
+                                </span>
+                            </div>
+                            <span class="text-[10px] text-gray-400 font-mono sm:text-right">⏱️ {{ club.regTime }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 狀態二：完全沒有報名紀錄 -->
+                <div v-else>
+                    <div class="flex flex-col items-center py-4 text-center">
+                        <span class="text-3xl mb-2">⚠️</span>
+                        <span class="text-base font-bold text-yellow-800">您尚未成功登記任何學會</span>
+                        <p class="text-xs text-gray-500 mt-1">請盡快至報名系統進行登記（每人最多可選 5 個）。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 錯誤提示 -->
+        <div v-if="errorMsg" class="mt-6 p-3 bg-red-50 border border-red-200 rounded text-red-800 text-sm font-semibold text-center">
+            ❌ {{ errorMsg }}
         </div>
 
     </div>
 
     <script>
-        const { createApp, ref, onMounted, nextTick } = Vue;
+        const { createApp, ref, onMounted } = Vue;
 
         createApp({
             setup() {
-                // ⚠️ 請換上您部署後的 Web App URL
                 const GAS_URL = "https://script.google.com/macros/s/AKfycbwu4gRHmVBm3O5yNAVUTbsXNTYc3g4RL58PzKNGAb0bBoMApQRNSCzDz1h4bymGFtCA/exec"; 
 
-                const classes = ref([]);
-                const clubs = ref([]);
-                const positions = ref([]);
-                
-                const teacherPassword = ref('');
-                const selectedClub = ref('');
+                const classes = ref([]); 
                 const inputClass = ref('');
                 const inputStudentId = ref('');
-                const selectedPosition = ref('會員'); 
-                
+                const inputStudentPassword = ref(''); 
                 const isLoading = ref(true);
-                const hintMsg = ref('');
-                const isSuccess = ref(false);
-                const studentIdInput = ref(null);
+                const queryResult = ref(null);
+                const errorMsg = ref('');
 
-                // 初始化載入班別、學會與動態崗位
-                const loadInitData = async () => {
+                // 根據職位關鍵字給予不同的精緻顏色
+                const getPositionClass = (position) => {
+                    if (!position) return 'bg-gray-100 text-gray-600';
+                    if (position.includes('主席') || position.includes('隊長') || position.includes('社長')) {
+                        return 'bg-amber-100 text-amber-800 border border-amber-200 shadow-sm'; // 金黃領袖色
+                    } else if (position.includes('副')) {
+                        return 'bg-blue-100 text-blue-800 border border-blue-200'; // 藍色副手色
+                    } else if (position.includes('幹事') || position.includes('委員') || position.includes('書記') || position.includes('財政')) {
+                        return 'bg-purple-100 text-purple-800 border border-purple-200'; // 紫色骨幹色
+                    }
+                    return 'bg-gray-100 text-gray-600 border border-gray-200'; // 灰色會員色
+                };
+
+                const loadClasses = async () => {
                     isLoading.value = true;
                     try {
                         const response = await fetch(GAS_URL, {
@@ -122,80 +145,49 @@
                         const data = await response.json();
                         if (data.status === "success") {
                             classes.value = data.classes || [];
-                            clubs.value = data.clubs || [];
-                            positions.value = data.positions || [];
-                            
-                            if (positions.value.includes('會員')) {
-                                selectedPosition.value = '會員';
-                            } else if (positions.value.length > 0) {
-                                selectedPosition.value = positions.value[0];
-                            }
-
-                            // 💡 修正優化：成功載入選單後，自動聚焦到學號輸入框
-                            nextTick(() => {
-                                if (studentIdInput.value) studentIdInput.value.focus();
-                            });
                         }
                     } catch (error) {
-                        console.error(error);
-                        alert("初始化資料載入失敗，請確認網路或 GAS 後端發布狀態！");
+                        alert("讀取班級清單失敗，請確認網路連線或 GAS 設定！");
                     } finally {
-                        // 💡 修正關鍵：不論 try 成功還是 catch 失敗，最後一定會執行 finally 關閉遮罩
                         isLoading.value = false;
                     }
                 };
 
                 onMounted(() => {
-                    loadInitData();
+                    loadClasses();
                 });
 
-                // 提交登記
-                const handleRegister = async () => {
+                const handleQuery = async () => {
                     isLoading.value = true;
-                    hintMsg.value = '';
-                    isSuccess.value = false;
+                    queryResult.value = null;
+                    errorMsg.value = '';
 
                     try {
                         const response = await fetch(GAS_URL, {
                             method: "POST",
                             body: JSON.stringify({
-                                action: "register",
-                                teacherPassword: teacherPassword.value.trim(),
-                                sClass: inputClass.value,
+                                action: "query",
                                 studentId: inputStudentId.value.trim(),
-                                clubName: selectedClub.value,
-                                position: selectedPosition.value
+                                sClass: inputClass.value,
+                                studentPassword: inputStudentPassword.value.trim() 
                             })
                         });
                         const result = await response.json();
 
                         if (result.status === "success") {
-                            isSuccess.value = true;
-                            hintMsg.value = result.message;
-                            
-                            inputStudentId.value = '';
-                            
-                            if (positions.value.includes('會員')) {
-                                selectedPosition.value = '會員';
-                            }
-                            
-                            nextTick(() => {
-                                if (studentIdInput.value) studentIdInput.value.focus();
-                            });
+                            queryResult.value = result;
                         } else {
-                            isSuccess.value = false;
-                            hintMsg.value = result.message;
+                            errorMsg.value = result.message;
                         }
                     } catch (e) {
-                        isSuccess.value = false;
-                        hintMsg.value = "連線失敗，請檢查網路或密碼配置。";
+                        errorMsg.value = "連線失敗，請稍後重試。";
                     } finally {
                         isLoading.value = false;
                     }
                 };
 
                 return {
-                    classes, clubs, positions, teacherPassword, selectedClub, inputClass, inputStudentId, selectedPosition, isLoading, hintMsg, isSuccess, handleRegister, studentIdInput
+                    classes, inputClass, inputStudentId, inputStudentPassword, isLoading, queryResult, errorMsg, handleQuery, getPositionClass
                 };
             }
         }).mount('#app');
