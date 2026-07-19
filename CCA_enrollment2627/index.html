@@ -275,7 +275,8 @@
                 };
 
                 const currentClubMembers = computed(() => {
-                    return registrations.value.filter(r => r.clubName === currentClubName.value).reverse();
+                        // 先用 .slice() 複製一份乾淨的陣列再反轉，解除定格詛咒！
+                        return registrations.value.filter(r => r.clubName === currentClubName.value).slice().reverse();
                 });
 
                 const messageClass = computed(() => {
@@ -319,7 +320,9 @@
                                 position: pos // 🎖️ 同步推入前端顯示陣列中
                             });
                             
-                            inputStudentId.value = '';
+                            // ✨ 關鍵：清空學號的同時，也要清空班別！
+                                inputStudentId.value = '';
+                                inputClass.value = '';
                             // 批次輸入優化：成功登記後將崗位重置回「會員」
                             if (positions.value.includes('會員')) {
                                 selectedPosition.value = '會員';
