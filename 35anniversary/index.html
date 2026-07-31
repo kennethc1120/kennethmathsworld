@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>香港中文大學校友會聯會張煊昌中學 - 35周年校慶網站</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cuhkPurple: '#4B2E83',
+            cuhkDarkPurple: '#331B5B',
+            cuhkGold: '#D4AF37',
+            cuhkLightGold: '#F3E5AB',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #FFF6CD 0%, #D4AF37 50%, #AA7C11 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+
+  <!-- 1. 頂部導航欄 (Header) -->
+  <header class="sticky top-0 z-50 bg-cuhkPurple text-white shadow-xl border-b-2 border-cuhkGold">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo(0,0)">
+        <div class="w-12 h-12 bg-cuhkGold rounded-full flex items-center justify-center font-bold text-cuhkPurple text-xl shadow-md border-2 border-white">
+          張中
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-wide">中大校友會聯會張煊昌中學</h1>
+          <p class="text-xs text-cuhkLightGold tracking-widest uppercase">35 周年校慶特設網站</p>
+        </div>
+      </div>
+      <nav class="hidden md:flex space-x-6 text-sm font-medium">
+        <a href="#news" class="hover:text-cuhkGold transition">最新消息</a>
+        <a href="#events" class="hover:text-cuhkGold transition">校慶活動</a>
+        <a href="#souvenirs" class="hover:text-cuhkGold transition">紀念品專區</a>
+        <a href="#gallery" class="hover:text-cuhkGold transition">精彩回顧</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 2. 主視覺區 (Hero Section) -->
+  <section class="relative bg-gradient-to-b from-cuhkPurple via-cuhkDarkPurple to-black text-white py-20 px-4 text-center overflow-hidden">
+    <div class="relative max-w-4xl mx-auto z-10">
+      <span class="inline-block px-4 py-1 rounded-full bg-cuhkGold/20 text-cuhkLightGold border border-cuhkGold text-sm font-semibold mb-4">
+        1991 - 2026 璀璨三十五載
+      </span>
+      <h2 class="text-4xl sm:text-6xl font-extrabold mb-4 tracking-tight gold-gradient-text">
+        傳承三十五 ‧ 璀璨張中人
+      </h2>
+      <p class="text-gray-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
+        踏入 35 周年，張煊昌中學誠邀全體師生、校友及社會各界共襄盛舉。
+      </p>
+
+      <!-- 倒數計時器 -->
+      <div class="bg-white/10 backdrop-blur-md border border-cuhkGold/40 rounded-2xl p-6 mb-10 max-w-xl mx-auto shadow-2xl">
+        <p class="text-sm text-cuhkLightGold font-semibold mb-3 tracking-wider uppercase">距離「35 周年校慶開放日」還有</p>
+        <div class="grid grid-cols-4 gap-2 sm:gap-4 text-center">
+          <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="days" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">天</span></div>
+          <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="hours" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">時</span></div>
+          <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="minutes" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">分</span></div>
+          <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="seconds" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">秒</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 最新消息（動態載入） -->
+  <section id="news" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 border-b border-gray-200 pb-4">
+      <div>
+        <h3 class="text-3xl font-bold text-cuhkPurple">最新消息</h3>
+        <p class="text-gray-500 text-sm mt-1">即時掌握校慶活動動態與官方公告（試算表動態同步）</p>
+      </div>
+      <div class="flex space-x-2 mt-4 md:mt-0">
+        <button onclick="filterNews('all')" class="news-tab px-3 py-1.5 text-xs font-semibold rounded-full bg-cuhkPurple text-white">全部</button>
+        <button onclick="filterNews('notice')" class="news-tab px-3 py-1.5 text-xs font-semibold rounded-full bg-gray-200 text-gray-700">通告</button>
+        <button onclick="filterNews('competition')" class="news-tab px-3 py-1.5 text-xs font-semibold rounded-full bg-gray-200 text-gray-700">比賽資訊</button>
+      </div>
+    </div>
+
+    <!-- 動態載入容器 -->
+    <div id="news-container" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <p class="text-gray-400 col-span-3 text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-2"></i>正在載入最新消息...</p>
+    </div>
+  </section>
+
+  <!-- 4. 紀念品專區（動態載入含圖片） -->
+  <section id="souvenirs" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gray-100 rounded-3xl my-8">
+    <div class="text-center mb-12">
+      <h3 class="text-3xl font-bold text-cuhkPurple">35 周年限定紀念品</h3>
+      <p class="text-gray-600 mt-2">獨家設計，極具收藏價值</p>
+    </div>
+
+    <!-- 動態載入容器 -->
+    <div id="souvenir-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <p class="text-gray-400 col-span-3 text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-2"></i>正在載入紀念品資訊...</p>
+    </div>
+  </section>
+
+  <!-- 頁尾 -->
+  <footer class="bg-black text-gray-400 py-8 border-t-2 border-cuhkGold mt-auto text-center text-xs">
+    &copy; 2026 香港中文大學校友會聯會張煊昌中學. 版權所有.
+  </footer>
+
+  <!-- JavaScript：Google Sheets API 讀取邏輯 -->
+  <script>
+    // ⚠️【請替換這裡】：將下面的 SHEET_ID 改為您自己的 Google 試算表 ID
+    const SHEET_ID = '1lVqVXm1TWw5ZWVCnReMlXB2a5b1VU8dRuHtvMwABHKM';
+
+    // 讀取 Google Sheets GViz API
+	async function fetchSheetData(sheetName) {
+	  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+	  try {
+	    const response = await fetch(url);
+	    const text = await response.text();
+    
+	    // 解析 JSON
+	    const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+	    const json = JSON.parse(jsonString);
+    
+	    const table = json.table;
+	    // 取得欄位名稱 (若 label 為空則從 cols 取得)
+	    const cols = table.cols.map(col => col.label || col.id);
+    
+	    const rows = table.rows.map(row => {
+	      let item = {};
+	      row.c.forEach((cell, index) => {
+ 	       // 處理 Google API 的日期或文字格式
+ 	       const value = cell ? (cell.f || cell.v || '') : '';
+ 	       item[cols[index]] = value;
+ 	     });
+	      return item;
+	    });
+
+    console.log(`[${sheetName}] 成功抓取資料:`, rows); // 可在瀏覽器 F12 Console 查看
+    return rows;
+  } catch (error) {
+    console.error(`[${sheetName}] 抓取失敗:`, error);
+    return [];
+  }
+}
+
+    // 1. 渲染最新消息
+    async function loadNews() {
+      const newsData = await fetchSheetData('News');
+      const container = document.getElementById('news-container');
+      
+      if (!newsData.length) {
+        container.innerHTML = '<p class="text-gray-400 col-span-3 text-center">暫無消息</p>';
+        return;
+      }
+
+      container.innerHTML = newsData.map(item => `
+        <div class="news-card ${item.type || 'notice'} bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition">
+          <div class="${item.type === 'competition' ? 'bg-cuhkPurple text-cuhkGold' : 'bg-cuhkGold text-cuhkDarkPurple'} px-4 py-2 text-xs font-bold flex justify-between items-center">
+            <span>${item.type === 'competition' ? '比賽資訊' : '通告'}</span>
+            <span>${item.date || ''}</span>
+          </div>
+          <div class="p-6">
+            <h4 class="font-bold text-lg text-gray-800 mb-2">${item.title}</h4>
+            <p class="text-gray-600 text-sm mb-4">${item.content}</p>
+            <a href="${item.link || '#'}" class="text-cuhkPurple font-semibold text-sm hover:underline flex items-center">
+              查看詳情 <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 2. 渲染紀念品（包含圖片）
+    async function loadSouvenirs() {
+      const data = await fetchSheetData('Souvenirs');
+      const container = document.getElementById('souvenir-container');
+      
+      if (!data.length) {
+        container.innerHTML = '<p class="text-gray-400 col-span-3 text-center">暫無紀念品資訊</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(item => `
+        <div class="bg-white rounded-lg shadow border border-gray-200 p-6 text-center hover:border-cuhkGold transition flex flex-col justify-between">
+          <div>
+            <!-- 圖片容器 -->
+            <div class="w-full h-48 rounded-md overflow-hidden mb-4 bg-gray-100 flex items-center justify-center">
+              ${item.image 
+                ? `<img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover hover:scale-105 transition duration-300">`
+                : `<i class="fa-solid fa-gift text-5xl text-cuhkPurple"></i>`
+              }
+            </div>
+            <h4 class="font-bold text-lg text-gray-800">${item.name}</h4>
+            <p class="text-cuhkPurple font-bold mt-2">${item.price}</p>
+          </div>
+          <button class="mt-4 w-full py-2 bg-cuhkPurple text-white rounded text-sm hover:bg-cuhkDarkPurple transition">
+            ${item.status || '預購查詢'}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // 3. 消息分類篩選邏輯
+    function filterNews(category) {
+      const cards = document.querySelectorAll('.news-card');
+      document.querySelectorAll('.news-tab').forEach(tab => {
+        tab.classList.remove('bg-cuhkPurple', 'text-white');
+        tab.classList.add('bg-gray-200', 'text-gray-700');
+      });
+      event.target.classList.remove('bg-gray-200', 'text-gray-700');
+      event.target.classList.add('bg-cuhkPurple', 'text-white');
+
+      cards.forEach(card => {
+        if (category === 'all' || card.classList.contains(category)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // 初始化倒數計時與試算表數據
+    window.addEventListener('DOMContentLoaded', () => {
+      loadNews();
+      loadSouvenirs();
+
+      // 倒數計時（2026年12月5日）
+      const targetDate = new Date('December 5, 2026 09:00:00').getTime();
+      setInterval(() => {
+        const diff = targetDate - new Date().getTime();
+        if (diff > 0) {
+          document.getElementById('days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+          document.getElementById('hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+          document.getElementById('minutes').innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+          document.getElementById('seconds').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
