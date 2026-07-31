@@ -141,20 +141,27 @@
         </div>
 
         <!-- 右側動作欄/預約報名框 -->
-        <div class="bg-white/10 backdrop-blur-md p-8 lg:p-12 border-t lg:border-t-0 lg:border-l border-cuhkGold/30 flex flex-col justify-center items-center text-center">
-          <i class="fa-solid fa-ticket-simple text-5xl text-cuhkGold mb-4"></i>
-          <h5 class="text-xl font-bold mb-2">預先登記參觀</h5>
-          <p class="text-xs text-gray-300 mb-6 max-w-xs">提前完成網上登記，可於開放日現場換領 35 周年精美紀念貼紙乙套。</p>
-          
-          <div class="w-full space-y-3 max-w-xs">
-            <a href="https://forms.google.com" target="_blank" class="block w-full py-3 bg-cuhkGold text-cuhkDarkPurple font-bold rounded-lg hover:bg-yellow-400 transition shadow-lg">
-              <i class="fa-solid fa-pen-to-square mr-2"></i>網上登記入場
-            </a>
-            <button onclick="addToCalendar()" class="block w-full py-3 bg-transparent border border-cuhkGold text-cuhkLightGold font-semibold rounded-lg hover:bg-cuhkGold/10 transition text-sm">
-              <i class="fa-regular fa-calendar-plus mr-2"></i>新增至 Google 行事曆
-            </button>
-          </div>
-        </div>
+        <!-- 右側動作欄：自由入場提示 (無需登記) -->
+			<div class="bg-white/10 backdrop-blur-md p-8 lg:p-12 border-t lg:border-t-0 lg:border-l border-cuhkGold/30 flex flex-col justify-center items-center text-center">
+ 			 <!-- 圖示改為開放校門/歡迎圖示 -->
+ 			 <i class="fa-solid fa-door-open text-5xl text-cuhkGold mb-4"></i>
+  				<h5 class="text-xl font-bold mb-2">歡迎自由入場參觀</h5>
+ 				 <p class="text-xs text-gray-300 mb-6 max-w-xs leading-relaxed">
+  				  無需預先登記，歡迎全體校友、家長、學生及社區公眾人士於開放時間內自由蒞臨參觀。
+ 				 </p>
+  
+			  <div class="w-full space-y-3 max-w-xs">
+			    <!-- 新增至日曆按鈕 -->
+			    <button onclick="addToCalendar()" class="block w-full py-3 bg-cuhkGold text-cuhkDarkPurple font-bold rounded-lg hover:bg-yellow-400 transition shadow-lg text-sm">
+			      <i class="fa-regular fa-calendar-plus mr-2"></i>新增至 Google 行事曆
+			    </button>
+    
+			    <!-- 校園地圖/交通指引按鈕 -->
+  				  <a href="https://maps.google.com/?q=香港中文大學校友會聯會張煊昌中學" target="_blank" class="block w-full py-3 bg-transparent border border-cuhkGold text-cuhkLightGold font-semibold rounded-lg hover:bg-cuhkGold/10 transition text-sm">
+ 			     <i class="fa-solid fa-map-location-dot mr-2"></i>檢視 Google 地圖與交通
+ 			   </a>
+			  </div>
+			</div>
       </div>
     </div>
 
