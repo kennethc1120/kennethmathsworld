@@ -53,31 +53,46 @@
     </div>
   </header>
 
-  <!-- 2. 主視覺區 (Hero Section) -->
-  <section class="relative bg-gradient-to-b from-cuhkPurple via-cuhkDarkPurple to-black text-white py-20 px-4 text-center overflow-hidden">
-    <div class="relative max-w-4xl mx-auto z-10">
-      <span class="inline-block px-4 py-1 rounded-full bg-cuhkGold/20 text-cuhkLightGold border border-cuhkGold text-sm font-semibold mb-4">
-        1991 - 2026 璀璨三十五載
-      </span>
-      <h2 class="text-4xl sm:text-6xl font-extrabold mb-4 tracking-tight gold-gradient-text">
-        傳承三十五 ‧ 璀璨張中人
-      </h2>
-      <p class="text-gray-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
-        踏入 35 周年，張煊昌中學誠邀全體師生、校友及社會各界共襄盛舉。
-      </p>
+<!-- 2. 主視覺區 (Hero Section) - 已加入背景圖 -->
+<section class="relative text-white py-20 px-4 text-center overflow-hidden bg-cover bg-center bg-no-repeat" 
+         style="background-image: linear-gradient(to bottom, rgba(75, 46, 131, 0.85), rgba(51, 27, 91, 0.90), rgba(0, 0, 0, 0.92)), url('images/main_bg.jpg');">
+  
+  <!-- 微微金色粒子或網格紋理疊加（保留質感） -->
+  <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] [background-size:16px_16px]"></div>
 
-      <!-- 倒數計時器 -->
-      <div class="bg-white/10 backdrop-blur-md border border-cuhkGold/40 rounded-2xl p-6 mb-10 max-w-xl mx-auto shadow-2xl">
-        <p class="text-sm text-cuhkLightGold font-semibold mb-3 tracking-wider uppercase">距離「35 周年校慶開放日」還有</p>
-        <div class="grid grid-cols-4 gap-2 sm:gap-4 text-center">
-          <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="days" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">天</span></div>
-          <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="hours" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">時</span></div>
-          <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="minutes" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">分</span></div>
-          <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="seconds" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">秒</span></div>
-        </div>
+  <div class="relative max-w-4xl mx-auto z-10">
+    <span class="inline-block px-4 py-1 rounded-full bg-cuhkGold/20 text-cuhkLightGold border border-cuhkGold text-sm font-semibold mb-4 backdrop-blur-sm">
+      1991 - 2026 璀璨三十五載
+    </span>
+    <h2 class="text-4xl sm:text-6xl font-extrabold mb-4 tracking-tight gold-gradient-text">
+      傳承三十五 ‧ 璀璨張中人
+    </h2>
+    <p class="text-gray-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
+      踏入 35 周年，張煊昌中學誠邀全體師生、校友及社會各界共襄盛舉，見證三十五載的桃李芬芳與輝煌成就。
+    </p>
+
+    <!-- 倒數計時器 -->
+    <div class="bg-black/30 backdrop-blur-md border border-cuhkGold/40 rounded-2xl p-6 mb-10 max-w-xl mx-auto shadow-2xl">
+      <p class="text-sm text-cuhkLightGold font-semibold mb-3 tracking-wider uppercase">距離「35 周年校慶開放日」還有</p>
+      <div class="grid grid-cols-4 gap-2 sm:gap-4 text-center">
+        <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="days" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">天</span></div>
+        <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="hours" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">時</span></div>
+        <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="minutes" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">分</span></div>
+        <div class="bg-cuhkDarkPurple/80 p-3 rounded-lg border border-cuhkGold/30"><span id="seconds" class="block text-2xl sm:text-4xl font-bold text-cuhkGold">00</span><span class="text-xs text-gray-300">秒</span></div>
       </div>
     </div>
-  </section>
+
+    <!-- 行動按鈕 -->
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+      <a href="#events" class="px-8 py-3.5 bg-cuhkGold text-cuhkDarkPurple font-bold rounded-lg shadow-lg hover:bg-yellow-400 transition transform hover:-translate-y-0.5">
+        <i class="fa-solid fa-calendar-star mr-2"></i>瀏覽校慶活動
+      </a>
+      <a href="#gallery" class="px-8 py-3.5 bg-black/40 backdrop-blur-sm border-2 border-cuhkGold text-cuhkLightGold font-semibold rounded-lg hover:bg-cuhkGold/20 transition">
+        <i class="fa-solid fa-circle-play mr-2"></i>回顧啟動音樂會
+      </a>
+    </div>
+  </div>
+</section>
 
   <!-- 3. 最新消息（動態載入） -->
   <section id="news" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
