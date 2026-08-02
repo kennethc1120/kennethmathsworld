@@ -68,6 +68,11 @@
                             </span>
                         </div>
                         <div v-if="isClubFull" class="text-xs text-red-500 font-bold text-right mt-1">⚠️ 該學會名額已滿！</div>
+                        
+                        <!-- 🚫 中一限制提示 -->
+                        <div v-if="isCurrentClubF1Restricted" class="mt-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800 font-semibold flex items-center gap-1">
+                            ⚠️ 本學會不開放中一級同學報名
+                        </div>
                     </div>
 
                     <div class="bg-white p-6 rounded-lg shadow-md">
@@ -86,7 +91,6 @@
                                 <input ref="studentIdInput" v-model="inputStudentId" type="text" placeholder="請輸入或掃描學號" class="w-full border border-gray-300 rounded px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono" required />
                             </div>
 
-                            <!-- 🎖️ 新增功能：擔任崗位選擇器 -->
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">擔任崗位</label>
                                 <select v-model="selectedPosition" class="w-full border border-gray-300 rounded px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" required>
@@ -124,7 +128,6 @@
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">班別</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">學號</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">學生姓名</th>
-                                            <!-- 🎖️ 表格新增顯示欄位 -->
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">職位崗位</th>
                                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
                                         </tr>
@@ -135,7 +138,6 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-2 py-1 bg-gray-100 rounded font-semibold">{{ member.sClass }}</span></td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-semibold">{{ member.studentId }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">{{ member.name }}</td>
-                                            <!-- 🎖️ 顯示該學生被核准的崗位 -->
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                 <span class="px-2 py-0.5 text-xs rounded font-medium" :class="member.position === '會員' || !member.position ? 'bg-slate-100 text-slate-700' : 'bg-amber-100 text-amber-800 font-bold'">
                                                     {{ member.position || '會員' }}
@@ -164,7 +166,6 @@
 
         createApp({
             setup() {
-                // 請保持填寫您部署 Google Apps Script 後取得的網頁應用程式 URL
                 const GAS_URL = "https://script.google.com/macros/s/AKfycbwu4gRHmVBm3O5yNAVUTbsXNTYc3g4RL58PzKNGAb0bBoMApQRNSCzDz1h4bymGFtCA/exec"; 
 
                 const isAuthorized = ref(false);
@@ -176,7 +177,9 @@
                 const studentDatabase = ref([]); 
                 const registrations = ref([]);   
                 
-                // 🎖️ 新增：崗位設定的響應式變數
+                // 🚫 填寫不可加入中一同學的學會名稱陣列
+                const restrictedF1Clubs = ref(['高級辯論學會', '籃球校隊']); 
+
                 const positions = ref(['會員']); 
                 const selectedPosition = ref('會員');
                 
@@ -189,6 +192,18 @@
                 const loadingText = ref("正在同步雲端資料庫，請稍候...");
                 const studentIdInput = ref(null);
 
+                // 判斷班別是否屬於中一（相容 1A, 1B, S1A, F.1A 等格式）
+                const isForm1Class = (className) => {
+                    if (!className) return false;
+                    const c = className.trim().toUpperCase();
+                    return c.startsWith('1') || c.startsWith('S1') || c.startsWith('F.1') || c.startsWith('F1');
+                };
+
+                // 檢查當前選取的學會是否限制中一級
+                const isCurrentClubF1Restricted = computed(() => {
+                    return restrictedF1Clubs.value.includes(currentClubName.value);
+                });
+
                 const currentClubLimit = computed(() => {
                     const found = clubs.value.find(c => c.name === currentClubName.value);
                     return found ? found.limit : 1000;
@@ -198,16 +213,13 @@
                     return currentClubMembers.value.length >= currentClubLimit.value;
                 });
 
-                // 處理初始化回傳的資料格式
                 const parseInitData = (data) => {
                     studentDatabase.value = data.students;
                     registrations.value = data.regs;
                     classes.value = data.classes || [];
                     
-                    // 同步 E 欄讀取出來的職位清單
                     if (data.positions && data.positions.length > 0) {
                         positions.value = data.positions;
-                        // 確保預設值仍優先選「會員」，若無則指向第一個職位
                         if (positions.value.includes('會員')) {
                             selectedPosition.value = '會員';
                         } else {
@@ -246,7 +258,8 @@
                         }
                     } catch (error) {
                         loginError.value = "網路連線失敗或 GAS 設定有誤。";
-                    } finally {
+                    } font-semibold
+                    finally {
                         isLoading.value = false;
                     }
                 };
@@ -275,8 +288,7 @@
                 };
 
                 const currentClubMembers = computed(() => {
-                        // 先用 .slice() 複製一份乾淨的陣列再反轉，解除定格詛咒！
-                        return registrations.value.filter(r => r.clubName === currentClubName.value).slice().reverse();
+                    return registrations.value.filter(r => r.clubName === currentClubName.value).slice().reverse();
                 });
 
                 const messageClass = computed(() => {
@@ -291,8 +303,14 @@
                     
                     const sid = inputStudentId.value.trim();
                     const sClass = inputClass.value;
-                    const pos = selectedPosition.value; // 取得所選崗位
+                    const pos = selectedPosition.value;
                     
+                    // 🚫 新增：限制中一同學報名特定學會
+                    if (isForm1Class(sClass) && isCurrentClubF1Restricted.value) {
+                        showMsg(`❌ 報名失敗：「${currentClubName.value}」不開放予中一級同學報名！`, "error");
+                        return;
+                    }
+
                     isLoading.value = true;
                     loadingText.value = "正在上傳報名資料...";
 
@@ -304,7 +322,7 @@
                                 studentId: sid,
                                 sClass: sClass,
                                 clubName: currentClubName.value,
-                                position: pos, // 🎖️ 將崗位傳送至 GAS 後端
+                                position: pos,
                                 clientPassword: passwordInput.value.trim() 
                             })
                         });
@@ -317,13 +335,11 @@
                                 sClass: sClass,
                                 studentId: sid,
                                 name: result.name,
-                                position: pos // 🎖️ 同步推入前端顯示陣列中
+                                position: pos
                             });
                             
-                            // ✨ 關鍵：清空學號的同時，也要清空班別！
-                                inputStudentId.value = '';
-                                inputClass.value = '';
-                            // 批次輸入優化：成功登記後將崗位重置回「會員」
+                            inputStudentId.value = '';
+                            inputClass.value = '';
                             if (positions.value.includes('會員')) {
                                 selectedPosition.value = '會員';
                             }
@@ -372,6 +388,7 @@
                     isAuthorized, passwordInput, loginError, verifyPassword,
                     clubs, classes, positions, selectedPosition, currentClubName, inputClass, inputStudentId, message, isLoading, loadingText,
                     currentClubMembers, messageClass, studentIdInput, currentClubLimit, isClubFull,
+                    restrictedF1Clubs, isCurrentClubF1Restricted,
                     handleRegister, removeMember, resetInput, syncData
                 };
             }
